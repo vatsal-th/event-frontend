@@ -1,0 +1,35 @@
+@import "tailwindcss";
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,301,701,300,501,401,901,400&display=swap');
+
+@theme {
+  --color-brand-purple: #6D28D9;
+  --color-brand-purple-light: #8B5CF6;
+  --color-brand-dark: #1F2937;
+  --color-brand-gray: #F3F4F6;
+
+  --font-sans: "Satoshi", "Inter", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-white text-brand-dark min-h-screen font-sans;
+  }
+}
+
+@layer components {
+  .section-container {
+    @apply max-w-7xl mx-auto px-4;
+  }
+
+  .card-white {
+    @apply bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300;
+  }
+
+  .btn-primary {
+    @apply bg-brand-purple hover:bg-brand-purple-light text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-300 shadow-sm active:scale-95;
+  }
+
+  .btn-outline {
+    @apply border border-gray-200 hover:bg-gray-50 text-brand-dark font-medium py-2.5 px-6 rounded-lg transition-all duration-300;
+  }
+}
