@@ -119,7 +119,7 @@ const About = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {stats.map((stat, idx) => (
-                            <div key={idx} className="bg-white p-10 rounded-[40px] border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+                            <div key={idx} className="bg-white p-10 rounded-[20px] border border-gray-100 shadow-sm hover:shadow-lg transition-all group cursor-pointer">
                                 <div className={`w-16 h-16 ${stat.color} rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform`}>
                                     {stat.icon}
                                 </div>
@@ -142,7 +142,7 @@ const About = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {features.map((feature, idx) => (
-                            <div key={idx} className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-lg transition-all text-center space-y-4">
+                            <div key={idx} className="bg-white p-8 rounded-[20px] border border-gray-100 shadow-sm hover:shadow-md transition-all text-center space-y-4 cursor-pointer">
                                 <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-2">
                                     {feature.icon}
                                 </div>

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { LuCalendar, LuWallet, LuCoins, LuMic, LuUsers, LuGift, LuArrowRight, LuCircleCheck, LuClock, LuStar } from 'react-icons/lu';
 import Button from '../components/common/Button';
+import ScratchCardModal from '../components/rewards/ScratchCardModal';
 
 const Services = () => {
     const [activeTab, setActiveTab] = useState('billing');
+    const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
 
     const statusCards = [
         {
@@ -167,16 +169,15 @@ const Services = () => {
                                 After your service is approved, you'll receive a scratch card reward.
                                 Scratch to reveal random points!
                             </p>
-                            <Button variant="primary" className="px-10 py-4 shadow-xl shadow-purple-200 group">
+                            <Button variant="primary" className="px-10 py-4 shadow-xl shadow-purple-200 group" onClick={() => setIsRewardModalOpen(true)}>
                                 Check Rewards
                                 <LuArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                             </Button>
                         </div>
                     </div>
 
-                    {/* Reward Card Visual */}
                     <div className="flex justify-center">
-                        <div className="relative group cursor-pointer pointer-events-auto">
+                        <div className="relative group cursor-pointer pointer-events-auto" onClick={() => setIsRewardModalOpen(true)}>
 
                             <div className="relative bg-gradient-to-br from-amber-400 via-orange-400 to-pink-400 p-1 lg:p-1.5 rounded-[2.5rem] shadow-2xl transition-transform duration-500">
                                 <div className="bg-white/40 backdrop-blur-md rounded-[2.2rem] p-8 md:p-12 text-center space-y-6 border border-white/40">
@@ -193,6 +194,12 @@ const Services = () => {
                     </div>
                 </div>
             </div>
+
+            <ScratchCardModal
+                isOpen={isRewardModalOpen}
+                onClose={() => setIsRewardModalOpen(false)}
+                points={3}
+            />
         </div>
     );
 };
