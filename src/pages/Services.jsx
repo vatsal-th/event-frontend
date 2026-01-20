@@ -4,12 +4,14 @@ import Button from '../components/common/Button';
 import ScratchCardModal from '../components/rewards/ScratchCardModal';
 import RewardHistoryModal from '../components/rewards/RewardHistoryModal';
 import TopUpStatusModal from '../components/status/TopUpStatusModal';
+import SalaryStatusModal from '../components/status/SalaryStatusModal';
 
 const Services = () => {
     const [activeTab, setActiveTab] = useState('billing');
     const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
+    const [isSalaryModalOpen, setIsSalaryModalOpen] = useState(false);
 
     const statusCards = [
         {
@@ -38,7 +40,8 @@ const Services = () => {
             status: 'Completed',
             statusType: 'completed',
             icon: <LuCoins size={32} className="text-emerald-500" />,
-            bgColor: 'bg-white'
+            bgColor: 'bg-white',
+            onClick: () => setIsSalaryModalOpen(true)
 
         },
         {
@@ -223,6 +226,12 @@ const Services = () => {
             <TopUpStatusModal
                 isOpen={isTopUpModalOpen}
                 onClose={() => setIsTopUpModalOpen(false)}
+                onClaimReward={() => setIsRewardModalOpen(true)}
+            />
+
+            <SalaryStatusModal
+                isOpen={isSalaryModalOpen}
+                onClose={() => setIsSalaryModalOpen(false)}
                 onClaimReward={() => setIsRewardModalOpen(true)}
             />
         </div>

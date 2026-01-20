@@ -59,19 +59,19 @@ const RewardHistoryModal = ({ isOpen, onClose }) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-brand-dark-purple/60 backdrop-blur-md transition-opacity duration-500"
+                className="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity duration-500"
                 onClick={onClose}
             />
 
             {/* Modal Content */}
-            <div className="relative w-full max-w-[480px] bg-[#F4F6F8] rounded-[24px] overflow-hidden shadow-2xl animate-in zoom-in-95 fade-in duration-300 flex flex-col max-h-[90vh]">
+            <div className="relative w-full max-w-[520px] bg-white rounded-[24px] overflow-hidden shadow-[0_20px_60px_rgba(109,40,217,0.2)] border border-purple-100 animate-in zoom-in-95 fade-in duration-300 flex flex-col max-h-[90vh]">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-5 bg-white border-b border-gray-100">
-                    <h3 className="text-lg font-black text-gray-900">Reward History</h3>
+                <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-violet-500 to-purple-600 text-white">
+                    <h3 className="text-lg font-black">Reward History</h3>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-all cursor-pointer"
+                        className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all cursor-pointer"
                     >
                         <LuX size={20} />
                     </button>
