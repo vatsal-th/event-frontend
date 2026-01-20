@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { LuCalendar, LuWallet, LuCoins, LuMic, LuUsers, LuGift, LuArrowRight, LuCircleCheck, LuClock, LuStar } from 'react-icons/lu';
+import { LuCalendar, LuWallet, LuCoins, LuMic, LuUsers, LuGift, LuArrowRight, LuCircleCheck, LuClock, LuStar, LuHistory } from 'react-icons/lu';
 import Button from '../components/common/Button';
 import ScratchCardModal from '../components/rewards/ScratchCardModal';
+import RewardHistoryModal from '../components/rewards/RewardHistoryModal';
+import TopUpStatusModal from '../components/status/TopUpStatusModal';
 
 const Services = () => {
     const [activeTab, setActiveTab] = useState('billing');
     const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+    const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
 
     const statusCards = [
         {
@@ -24,7 +28,8 @@ const Services = () => {
             status: 'Approved',
             statusType: 'approved',
             icon: <LuWallet size={32} className="text-blue-500" />,
-            bgColor: 'bg-white'
+            bgColor: 'bg-white',
+            onClick: () => setIsTopUpModalOpen(true)
         },
         {
             title: 'Salary Status',
@@ -98,7 +103,11 @@ const Services = () => {
             {/* Status Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-24">
                 {statusCards.map((card, idx) => (
-                    <div key={idx} className="group relative bg-[#F4F6F8] rounded-[20px] p-6 border border-gray-100 hover:shadow-md hover:border-brand-purple/20 transition-all duration-500 cursor-pointer">
+                    <div
+                        key={idx}
+                        onClick={card.onClick}
+                        className={`group relative bg-[#F4F6F8] rounded-[20px] p-6 border border-gray-100 hover:shadow-md hover:border-brand-purple/20 transition-all duration-500 ${card.onClick ? 'cursor-pointer' : ''}`}
+                    >
                         {/* Status Badge - Top Right */}
                         {card.statusType !== 'action' && (
                             <div className={`absolute top-2 right-2 inline-flex items-center px-2 py-1 rounded-full font-semibold text-[10px] font-black uppercase tracking-wider border ${getStatusStyle(card.statusType)} z-10`}>
@@ -169,10 +178,15 @@ const Services = () => {
                                 After your service is approved, you'll receive a scratch card reward.
                                 Scratch to reveal random points!
                             </p>
-                            <Button variant="primary" className="px-10 py-4 shadow-xl shadow-purple-200 group" onClick={() => setIsRewardModalOpen(true)}>
-                                Check Rewards
-                                <LuArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                            </Button>
+                            <div className="flex gap-4">
+                                <Button variant="primary" className="px-8 py-4 shadow-xl shadow-purple-200 group flex-1" onClick={() => setIsRewardModalOpen(true)}>
+                                    Check Rewards
+                                    <LuArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                                </Button>
+                                <Button variant="white" className="px-4 py-4 shadow-lg shadow-gray-100 text-gray-500 hover:text-brand-purple" onClick={() => setIsHistoryModalOpen(true)}>
+                                    <LuHistory size={20} />
+                                </Button>
+                            </div>
                         </div>
                     </div>
 
@@ -198,7 +212,18 @@ const Services = () => {
             <ScratchCardModal
                 isOpen={isRewardModalOpen}
                 onClose={() => setIsRewardModalOpen(false)}
-                points={3}
+                rewardAmount="1000"
+            />
+
+            <RewardHistoryModal
+                isOpen={isHistoryModalOpen}
+                onClose={() => setIsHistoryModalOpen(false)}
+            />
+
+            <TopUpStatusModal
+                isOpen={isTopUpModalOpen}
+                onClose={() => setIsTopUpModalOpen(false)}
+                onClaimReward={() => setIsRewardModalOpen(true)}
             />
         </div>
     );
