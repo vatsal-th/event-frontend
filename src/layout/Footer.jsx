@@ -1,10 +1,11 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { LuPhone, LuMapPin } from 'react-icons/lu';
 import { FaFacebook, FaInstagram, FaYoutube, FaTwitter } from 'react-icons/fa';
 
 const Footer = () => {
     return (
-        <footer className="bg-gray-50 border-t border-gray-100 mt-20">
+        <footer className="bg-gray-50 border-t border-gray-100">
             <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                     {/* Brand/Logo Section */}
@@ -24,10 +25,10 @@ const Footer = () => {
                     <div>
                         <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-6">Quick Links</h3>
                         <ul className="space-y-4 text-gray-500 text-sm">
-                            <li><a href="/" className="hover:text-brand-purple transition-colors">Home</a></li>
-                            <li><a href="/services" className="hover:text-brand-purple transition-colors">Services</a></li>
-                            <li><a href="/apply-agency" className="hover:text-brand-purple transition-colors">Apply for Agency</a></li>
-                            <li><a href="/apply-event" className="hover:text-brand-purple transition-colors">Apply for Event</a></li>
+                            <li><Link to="/" className="hover:text-brand-purple transition-colors">Home</Link></li>
+                            <li><Link to="/services" className="hover:text-brand-purple transition-colors">Services</Link></li>
+                            <li><Link to="/apply-agency" className="hover:text-brand-purple transition-colors">Apply for Agency</Link></li>
+                            <li><Link to="/apply-event" className="hover:text-brand-purple transition-colors">Apply for Event</Link></li>
                         </ul>
                     </div>
 
@@ -71,8 +72,8 @@ const Footer = () => {
                 <div className="mt-16 pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center text-gray-400 text-xs">
                     <p>© 2026 Rajput Entertainment Hub. All rights reserved.</p>
                     <div className="flex space-x-8 mt-4 md:mt-0">
-                        <a href="#" className="hover:text-gray-600">Privacy Policy</a>
-                        <a href="#" className="hover:text-gray-600">Terms of Service</a>
+                        <Link to="#" className="hover:text-gray-600">Privacy Policy</Link>
+                        <Link to="#" className="hover:text-gray-600">Terms of Service</Link>
                     </div>
                 </div>
             </div>

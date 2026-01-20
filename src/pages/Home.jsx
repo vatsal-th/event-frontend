@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { LuSmartphone, LuUsers, LuMic, LuStar, LuGift, LuShare2, LuWallet } from 'react-icons/lu';
 import Button from '../components/common/Button';
 
@@ -154,12 +155,12 @@ const Home = () => {
 
             {/* Float WhatsApp */}
             <div className="fixed bottom-10 right-10 z-50">
-                <a href="#" className="flex items-center space-x-3 bg-[#25D366] text-white pr-6 pl-2 py-2 rounded-full shadow-2xl hover:scale-105 transition-transform group">
+                <Link to="#" className="flex items-center space-x-3 bg-[#25D366] text-white pr-6 pl-2 py-2 rounded-full shadow-2xl hover:scale-105 transition-transform group">
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:animate-pulse">
                         <LuSmartphone size={24} />
                     </div>
                     <span className="font-bold">Chat with us</span>
-                </a>
+                </Link>
             </div>
         </div>
     );

@@ -5,6 +5,12 @@ import ScratchCardModal from '../components/rewards/ScratchCardModal';
 import RewardHistoryModal from '../components/rewards/RewardHistoryModal';
 import TopUpStatusModal from '../components/status/TopUpStatusModal';
 import SalaryStatusModal from '../components/status/SalaryStatusModal';
+import InviteStatusModal from '../components/status/InviteStatusModal';
+import BillingStatusModal from '../components/status/BillingStatusModal';
+import InfluencerStatusModal from '../components/status/InfluencerStatusModal';
+import HostingStatusModal from '../components/status/HostingStatusModal';
+import AgencyStatusModal from '../components/status/AgencyStatusModal';
+import EventStatusModal from '../components/status/EventStatusModal';
 
 const Services = () => {
     const [activeTab, setActiveTab] = useState('billing');
@@ -12,6 +18,12 @@ const Services = () => {
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
     const [isSalaryModalOpen, setIsSalaryModalOpen] = useState(false);
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
+    const [isInfluencerModalOpen, setIsInfluencerModalOpen] = useState(false);
+    const [isHostingModalOpen, setIsHostingModalOpen] = useState(false);
+    const [isAgencyModalOpen, setIsAgencyModalOpen] = useState(false);
+    const [isEventModalOpen, setIsEventModalOpen] = useState(false);
 
     const statusCards = [
         {
@@ -21,7 +33,8 @@ const Services = () => {
             status: 'Awaiting Approval',
             statusType: 'awaiting',
             icon: <LuCalendar size={32} className="text-orange-500" />,
-            bgColor: 'bg-white'
+            bgColor: 'bg-white',
+            onClick: () => setIsEventModalOpen(true)
         },
         {
             title: 'Top Up Status',
@@ -51,7 +64,8 @@ const Services = () => {
             status: 'Awaiting Approval',
             statusType: 'awaiting',
             icon: <LuMic size={32} className="text-indigo-500" />,
-            bgColor: 'bg-white'
+            bgColor: 'bg-white',
+            onClick: () => setIsHostingModalOpen(true)
 
         },
         {
@@ -61,7 +75,8 @@ const Services = () => {
             status: 'Awaiting Approval',
             statusType: 'awaiting',
             icon: <LuUsers size={32} className="text-purple-500" />,
-            bgColor: 'bg-white'
+            bgColor: 'bg-white',
+            onClick: () => setIsAgencyModalOpen(true)
 
         },
         {
@@ -109,7 +124,7 @@ const Services = () => {
                     <div
                         key={idx}
                         onClick={card.onClick}
-                        className={`group relative bg-[#F4F6F8] rounded-[20px] p-6 border border-gray-100 hover:shadow-md hover:border-brand-purple/20 transition-all duration-500 ${card.onClick ? 'cursor-pointer' : ''}`}
+                        className={`group relative bg-[#F4F6F8] rounded-[20px] p-6 border border-gray-100 hover:shadow-md hover:border-brand-purple/20 transition-all duration-500 ${card.onClick ? 'cursor-pointer' : 'cursor-pointer'}`}
                     >
                         {/* Status Badge - Top Right */}
                         {card.statusType !== 'action' && (
@@ -133,7 +148,11 @@ const Services = () => {
                         <div className="space-y-4">
                             {card.statusType === 'action' ? (
                                 <div className="pt-4 border-t border-[#EAECEF]">
-                                    <Button variant="primary" className="w-full w-fit py-2 text-xs font-bold uppercase tracking-wider rounded-xl">
+                                    <Button
+                                        variant="primary"
+                                        className="w-full w-fit py-2 text-xs font-bold uppercase tracking-wider rounded-xl"
+                                        onClick={() => setIsHistoryModalOpen(true)}
+                                    >
                                         {card.status}
                                     </Button>
                                 </div>
@@ -164,7 +183,18 @@ const Services = () => {
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
+                                    onClick={() => {
+                                        setActiveTab(tab.id);
+                                        if (tab.id === 'billing') {
+                                            setIsBillingModalOpen(true);
+                                        }
+                                        if (tab.id === 'influencers') {
+                                            setIsInfluencerModalOpen(true);
+                                        }
+                                        if (tab.id === 'invite') {
+                                            setIsInviteModalOpen(true);
+                                        }
+                                    }}
                                     className={`px-6 py-2.5 rounded-full text-sm font-black transition-all cursor-pointer ${activeTab === tab.id
                                         ? 'bg-brand-purple text-white shadow-lg shadow-purple-200 ring-1 ring-purple-500/20'
                                         : 'bg-white text-gray-400 hover:text-gray-600 border border-gray-100'
@@ -185,9 +215,6 @@ const Services = () => {
                                 <Button variant="primary" className="px-8 py-4 shadow-xl shadow-purple-200 group flex-1" onClick={() => setIsRewardModalOpen(true)}>
                                     Check Rewards
                                     <LuArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                                </Button>
-                                <Button variant="white" className="px-4 py-4 shadow-lg shadow-gray-100 text-gray-500 hover:text-brand-purple" onClick={() => setIsHistoryModalOpen(true)}>
-                                    <LuHistory size={20} />
                                 </Button>
                             </div>
                         </div>
@@ -233,6 +260,38 @@ const Services = () => {
                 isOpen={isSalaryModalOpen}
                 onClose={() => setIsSalaryModalOpen(false)}
                 onClaimReward={() => setIsRewardModalOpen(true)}
+            />
+
+            <InviteStatusModal
+                isOpen={isInviteModalOpen}
+                onClose={() => setIsInviteModalOpen(false)}
+                onClaimReward={() => setIsRewardModalOpen(true)}
+            />
+
+            <BillingStatusModal
+                isOpen={isBillingModalOpen}
+                onClose={() => setIsBillingModalOpen(false)}
+            />
+
+            <InfluencerStatusModal
+                isOpen={isInfluencerModalOpen}
+                onClose={() => setIsInfluencerModalOpen(false)}
+                onClaimReward={() => setIsRewardModalOpen(true)}
+            />
+
+            <HostingStatusModal
+                isOpen={isHostingModalOpen}
+                onClose={() => setIsHostingModalOpen(false)}
+            />
+
+            <AgencyStatusModal
+                isOpen={isAgencyModalOpen}
+                onClose={() => setIsAgencyModalOpen(false)}
+            />
+
+            <EventStatusModal
+                isOpen={isEventModalOpen}
+                onClose={() => setIsEventModalOpen(false)}
             />
         </div>
     );
