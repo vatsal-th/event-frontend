@@ -1,30 +1,43 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LuSmartphone, LuUsers, LuMic, LuStar, LuGift, LuShare2, LuWallet } from 'react-icons/lu';
 import Button from '../components/common/Button';
+import ApplyForEventModal from '../components/status/ApplyForEventModal';
+import ApplyForInfluencerModal from '../components/status/ApplyForInfluencerModal';
+import ApplyForAgencyModal from '../components/status/ApplyForAgencyModal';
+import ApplyForHostingModal from '../components/status/ApplyForHostingModal';
 
 const Home = () => {
+    const navigate = useNavigate();
+    const [isApplyEventOpen, setIsApplyEventOpen] = useState(false);
+    const [isApplyInfluencerOpen, setIsApplyInfluencerOpen] = useState(false);
+    const [isApplyAgencyOpen, setIsApplyAgencyOpen] = useState(false);
+    const [isApplyHostingOpen, setIsApplyHostingOpen] = useState(false);
+
     const categories = [
         {
             title: 'Apply for Hosting',
             desc: 'Become a live host & earn',
             icon: <LuMic className="text-purple-600" />,
             action: 'Apply Now',
-            color: 'bg-purple-50'
+            color: 'bg-purple-50',
+            onClick: () => setIsApplyHostingOpen(true)
         },
         {
             title: 'Apply for Event',
             desc: 'Host or join events',
             icon: <LuStar className="text-blue-600" />,
             action: 'Apply Now',
-            color: 'bg-blue-50'
+            color: 'bg-blue-50',
+            onClick: () => setIsApplyEventOpen(true)
         },
         {
             title: 'Apply for Agency',
             desc: 'Start your own agency',
             icon: <LuUsers className="text-indigo-600" />,
             action: 'Apply Now',
-            color: 'bg-indigo-50'
+            color: 'bg-indigo-50',
+            onClick: () => setIsApplyAgencyOpen(true)
         },
         {
             title: 'Top Up For User',
@@ -39,14 +52,16 @@ const Home = () => {
             desc: 'Recharge wallet & buy coins easily',
             icon: <LuWallet className="text-violet-600" />,
             action: 'Apply Now',
-            color: 'bg-violet-50'
+            color: 'bg-violet-50',
+            onClick: () => navigate('/register')
         },
         {
             title: 'Apply for Influencers',
             desc: 'Reach brands as influencer',
             icon: <LuShare2 className="text-pink-600" />,
             action: 'Apply Now',
-            color: 'bg-pink-50'
+            color: 'bg-pink-50',
+            onClick: () => setIsApplyInfluencerOpen(true)
         },
         {
             title: 'Invite Friends & Earn Rewards',
@@ -54,7 +69,8 @@ const Home = () => {
             icon: <LuGift className="text-emerald-600" />,
             action: 'Invite Now',
             color: 'bg-emerald-50',
-            isWide: true
+            isWide: true,
+            onClick: () => navigate('/invite')
         },
     ];
 
@@ -128,7 +144,8 @@ const Home = () => {
                     {categories.map((cat, idx) => (
                         <div
                             key={idx}
-                            className={`group bg-white p-8 rounded-[2rem] border border-gray-100 hover:border-brand-purple/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(109,40,217,0.1)] transition-all duration-500 flex flex-col justify-between cursor-pointer ${cat.isWide ? 'lg:col-span-1' : ''}`}
+                            onClick={cat.onClick}
+                            className={`group bg-white p-8 rounded-[20px] border border-gray-100 hover:border-brand-purple/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(109,40,217,0.1)] transition-all duration-500 flex flex-col justify-between cursor-pointer ${cat.isWide ? 'lg:col-span-1' : ''}`}
                         >
                             <div className="space-y-6">
                                 <div className={`w-16 h-16 ${cat.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
@@ -144,6 +161,12 @@ const Home = () => {
                                 <Button
                                     variant={cat.btnVariant === 'secondary' ? 'secondary' : 'primary'}
                                     className="w-full"
+                                    onClick={(e) => {
+                                        if (cat.onClick) {
+                                            e.stopPropagation();
+                                            cat.onClick();
+                                        }
+                                    }}
                                 >
                                     {cat.action}
                                 </Button>
@@ -152,18 +175,26 @@ const Home = () => {
                     ))}
                 </div>
             </section>
-
-            {/* Float WhatsApp */}
-            <div className="fixed bottom-10 right-10 z-50">
-                <Link to="#" className="flex items-center space-x-3 bg-[#25D366] text-white pr-6 pl-2 py-2 rounded-full shadow-2xl hover:scale-105 transition-transform group">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:animate-pulse">
-                        <LuSmartphone size={24} />
-                    </div>
-                    <span className="font-bold">Chat with us</span>
-                </Link>
-            </div>
+            {/* Modals */}
+            <ApplyForEventModal
+                isOpen={isApplyEventOpen}
+                onClose={() => setIsApplyEventOpen(false)}
+            />
+            <ApplyForInfluencerModal
+                isOpen={isApplyInfluencerOpen}
+                onClose={() => setIsApplyInfluencerOpen(false)}
+            />
+            <ApplyForAgencyModal
+                isOpen={isApplyAgencyOpen}
+                onClose={() => setIsApplyAgencyOpen(false)}
+            />
+            <ApplyForHostingModal
+                isOpen={isApplyHostingOpen}
+                onClose={() => setIsApplyHostingOpen(false)}
+            />
         </div>
     );
 };
+
 
 export default Home;

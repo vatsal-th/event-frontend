@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import ScrollToTop from './components/common/ScrollToTop';
 import MainLayout from './layout/MainLayout';
 import Home from './pages/Home';
 import Services from './pages/Services';
@@ -22,6 +23,7 @@ import Wallet from './pages/Wallet';
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <MainLayout>
         <Routes>
           <Route path="/" element={<Home />} />

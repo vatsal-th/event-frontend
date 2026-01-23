@@ -91,14 +91,14 @@ const Navbar = () => {
                         </Link>
                     ))}
                     <div className="flex flex-col space-y-3 pt-4 border-t border-gray-100">
-                        <Link to="/login" onClick={() => setIsOpen(false)}>
-                            <Button variant="secondary" className="w-full">
-                                Login
+                        <Link to="/about">
+                            <Button variant="secondary" size="sm" className="rounded-full px-6">
+                                About us
                             </Button>
                         </Link>
-                        <Link to="/register" onClick={() => setIsOpen(false)}>
+                        <Link to="/login" onClick={() => setIsOpen(false)}>
                             <Button variant="primary" className="w-full">
-                                Register
+                                Login / Register
                             </Button>
                         </Link>
                     </div>
