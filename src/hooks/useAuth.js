@@ -1,22 +1,37 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { login, logout } from '../store/slices/authSlice';
+import { loginUser, registerUser, logout, clearError, updateDetails, getMe } from '../store/slices/authSlice';
 
 export const useAuth = () => {
     const dispatch = useDispatch();
-    const { isAuthenticated, user } = useSelector((state) => state.auth);
+    const { isAuthenticated, user, loading, error, success } = useSelector((state) => state.auth);
 
-    const loginUser = (userData) => {
-        dispatch(login(userData));
+    const login = (credentials) => {
+        return dispatch(loginUser(credentials));
+    };
+
+    const register = (userData) => {
+        return dispatch(registerUser(userData));
     };
 
     const logoutUser = () => {
         dispatch(logout());
     };
 
+    const handleClearError = () => {
+        dispatch(clearError());
+    }
+
     return {
         isAuthenticated,
         user,
-        login: loginUser,
+        loading,
+        error,
+        success,
+        login,
+        register,
+        updateUser: (userData) => dispatch(updateDetails(userData)),
+        refreshUser: () => dispatch(getMe()),
         logout: logoutUser,
+        clearError: handleClearError
     };
 };

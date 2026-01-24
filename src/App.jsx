@@ -19,8 +19,23 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Wallet from './pages/Wallet';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { getMe } from './store/slices/authSlice';
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      dispatch(getMe());
+    }
+  }, [dispatch]);
+
   return (
     <Router>
       <ScrollToTop />
@@ -43,6 +58,8 @@ function App() {
           <Route path="/employee-login" element={<EmployeeLogin />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgotpassword" element={<ForgotPassword />} />
+          <Route path="/resetpassword/:token" element={<ResetPassword />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="*" element={<LandingPage />} />

@@ -72,7 +72,7 @@ const Navbar = () => {
                     </Link>
 
                     {/* Desktop Nav */}
-                    <div className="hidden md:flex items-center space-x-8">
+                    <div className="hidden lg:flex items-center space-x-8">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.name}
@@ -109,9 +109,9 @@ const Navbar = () => {
                                         className="flex items-center space-x-2 p-1 pr-3 rounded-full border border-gray-100 hover:bg-purple-50 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-200 cursor-pointer"
                                     >
                                         <div className="w-9 h-9 bg-gradient-to-tr from-purple-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                                            {user?.name?.charAt(0) || 'U'}
+                                            {user?.fullName?.charAt(0) || user?.name?.charAt(0) || 'U'}
                                         </div>
-                                        <span className="text-sm font-bold text-gray-700 max-w-[100px] truncate">{user?.name || 'User'}</span>
+                                        <span className="text-sm font-bold text-gray-700 max-w-[100px] truncate">{user?.fullName || user?.name || 'User'}</span>
                                         <LuChevronDown size={16} className={`text-gray-400 transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
                                     </button>
 
@@ -120,10 +120,10 @@ const Navbar = () => {
                                         <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transform origin-top-right animate-in fade-in slide-in-from-top-2 duration-200">
                                             <div className="p-4 bg-gray-50/50 border-b border-gray-100 flex items-center space-x-3">
                                                 <div className="w-12 h-12 bg-gradient-to-tr from-purple-500 to-indigo-500 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md cursor-pointer">
-                                                    {user?.name?.charAt(0) || 'U'}
+                                                    {user?.fullName?.charAt(0) || user?.name?.charAt(0) || 'U'}
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-gray-900">{user?.name || 'User Name'}</p>
+                                                    <p className="text-sm font-bold text-gray-900">{user?.fullName || user?.name || 'User Name'}</p>
                                                     <p className="text-xs text-gray-500">{user?.email || 'user@example.com'}</p>
                                                 </div>
                                             </div>
@@ -165,7 +165,7 @@ const Navbar = () => {
                     {/* Mobile menu button */}
                     <button
                         onClick={() => setIsOpen(!isOpen)}
-                        className="md:hidden text-gray-500 hover:text-gray-900 transition-colors bg-gray-50 p-2 rounded-lg"
+                        className="lg:hidden text-gray-500 hover:text-gray-900 transition-colors bg-gray-50 p-2 rounded-lg"
                     >
                         {isOpen ? <LuX size={24} /> : <LuMenu size={24} />}
                     </button>
@@ -174,14 +174,14 @@ const Navbar = () => {
 
             {/* Mobile Nav */}
             {isOpen && (
-                <div className="md:hidden bg-white border-b border-gray-100 p-6 flex flex-col space-y-4 shadow-xl absolute w-full left-0 top-20 animate-in slide-in-from-top-2 h-[calc(100vh-5rem)] overflow-y-auto">
+                <div className="lg:hidden bg-white border-b border-gray-100 p-6 flex flex-col space-y-4 shadow-xl absolute w-full left-0 top-20 animate-in slide-in-from-top-2 h-[calc(100vh-5rem)] overflow-y-auto">
                     {isAuthenticated && (
                         <div className="bg-purple-50 p-4 rounded-2xl flex items-center space-x-4 mb-2">
                             <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-brand-purple text-xl font-bold shadow-sm">
-                                {user?.name?.charAt(0) || 'U'}
+                                {user?.fullName?.charAt(0) || user?.name?.charAt(0) || 'U'}
                             </div>
                             <div>
-                                <p className="font-bold text-gray-900 leading-tight">Welcome, {user?.name}</p>
+                                <p className="font-bold text-gray-900 leading-tight">Welcome, {user?.fullName || user?.name}</p>
                                 <div className="flex items-center space-x-1 mt-1 text-sm text-brand-purple font-medium">
                                     <LuWallet size={14} />
                                     <span>Balance: ₹732</span>
