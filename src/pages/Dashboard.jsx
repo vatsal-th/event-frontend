@@ -7,7 +7,7 @@ import ApplyForInfluencerModal from '../components/status/ApplyForInfluencerModa
 import ApplyForAgencyModal from '../components/status/ApplyForAgencyModal';
 import ApplyForHostingModal from '../components/status/ApplyForHostingModal';
 
-const Home = () => {
+const Dashboard = () => {
     const navigate = useNavigate();
     const [isApplyEventOpen, setIsApplyEventOpen] = useState(false);
     const [isApplyInfluencerOpen, setIsApplyInfluencerOpen] = useState(false);
@@ -81,7 +81,7 @@ const Home = () => {
                 {/* Soft Background Sparkles */}
                 <div className="absolute inset-0 opacity-20 pointer-events-none">
                     <div className="absolute top-10 left-10 w-2 h-2 bg-white rounded-full animate-ping"></div>
-                    <div className="absolute bottom-20 right-40 w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                    <div className="absolute bottom-20 right-40 w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
                     <div className="absolute top-40 right-10 w-2 h-2 bg-white rounded-full animate-ping delay-700"></div>
                 </div>
 
@@ -197,4 +197,4 @@ const Home = () => {
 };
 
 
-export default Home;
+export default Dashboard;

@@ -1,8 +1,8 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ScrollToTop from './components/common/ScrollToTop';
 import MainLayout from './layout/MainLayout';
-import Home from './pages/Home';
+import LandingPage from './pages/LandingPage';
+import Dashboard from './pages/Dashboard';
 import Services from './pages/Services';
 import ApplyForHosting from './pages/ApplyForHosting';
 import ApplyForEvent from './pages/ApplyForEvent';
@@ -26,7 +26,8 @@ function App() {
       <ScrollToTop />
       <MainLayout>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} />
           <Route path="/services" element={<Services />} />
@@ -44,7 +45,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/wallet" element={<Wallet />} />
-          <Route path="*" element={<Home />} />
+          <Route path="*" element={<LandingPage />} />
         </Routes>
       </MainLayout>
     </Router>
