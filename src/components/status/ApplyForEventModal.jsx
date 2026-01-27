@@ -137,17 +137,7 @@ const ApplyForEventModal = ({ isOpen, onClose }) => {
                         onChange={(val) => setFormData({ ...formData, budget: val })}
                         icon={<LuGem className="text-blue-500" size={18} />}
                     />
-                </ModernInputContainer>
-
-                {/* Event Name */}
-                <ModernInputContainer label="Event Name" rightLabel="Joyo PK">
-                    <ModernSelect
-                        value={formData.eventName}
-                        options={eventOptions}
-                        onChange={(val) => setFormData({ ...formData, eventName: val })}
-                        icon={<LuGem className="text-blue-500" size={18} />}
-                    />
-                </ModernInputContainer>
+                </ModernInputContainer> 
 
                 {/* Time & Date */}
                 <div className="space-y-4 pt-2">

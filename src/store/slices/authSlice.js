@@ -13,7 +13,6 @@ export const registerUser = createAsyncThunk(
             const { token, ...user } = data;
 
             // Allow auto-login after register by returning token/user
-            localStorage.setItem('isAuthenticated', 'true');
             localStorage.setItem('user', JSON.stringify(user));
             localStorage.setItem('token', token);
             return { user, token };
@@ -96,7 +95,6 @@ export const loginUser = createAsyncThunk(
 
             const { token, ...user } = data;
 
-            localStorage.setItem('isAuthenticated', 'true');
             localStorage.setItem('user', JSON.stringify(user));
             localStorage.setItem('token', token);
             return { user, token };
@@ -118,7 +116,7 @@ const getLocalStorageItem = (key) => {
 };
 
 const initialState = {
-    isAuthenticated: localStorage.getItem('isAuthenticated') === 'true',
+    isAuthenticated: !!localStorage.getItem('token'),
     user: getLocalStorageItem('user'),
     token: localStorage.getItem('token') || null,
     loading: false,
@@ -137,7 +135,6 @@ const authSlice = createSlice({
             state.error = null;
             state.loading = false;
             state.success = false;
-            localStorage.removeItem('isAuthenticated');
             localStorage.removeItem('user');
             localStorage.removeItem('token');
         },
@@ -224,7 +221,6 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.user = null;
                 state.token = null;
-                localStorage.removeItem('isAuthenticated');
                 localStorage.removeItem('user');
                 localStorage.removeItem('token');
             });

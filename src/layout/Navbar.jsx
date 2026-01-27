@@ -28,13 +28,11 @@ const Navbar = () => {
         { name: 'Services', href: '/services' },
         { name: 'Training', href: '/training' },
         { name: 'Feedback & Issues', href: '/feedback' },
-        { name: 'Employee Login', href: '/employee-login' },
     ];
 
     // Filter links: Guests see Home/Services/Etc. Logged in users see Dashboard etc.
     const guestNavLinks = [
         { name: 'Home', href: '/' },
-        { name: 'Services', href: '/services' },
         { name: 'Training', href: '/training' },
         { name: 'Feedback & Issues', href: '/feedback' },
         { name: 'Employee Login', href: '/employee-login' },

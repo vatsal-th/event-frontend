@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { BASE_URL } from '../config/constants';
 
 /**
  * Generic API client wrapper around fetch.
@@ -28,6 +28,11 @@ export const apiClient = async (endpoint, options = {}) => {
             ...options.headers,
         },
     };
+
+    // If body is FormData, let the browser set the Content-Type with boundary
+    if (options.body instanceof FormData) {
+        delete config.headers['Content-Type'];
+    }
 
     try {
         const response = await fetch(url, config);

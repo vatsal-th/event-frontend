@@ -152,7 +152,7 @@ const ApplyForHostingModal = ({ isOpen, onClose }) => {
             <div className="space-y-5 pt-8 pb-4 text-center px-4">
                 <Button
                     variant="primary"
-                    className="w-full py-4 rounded-[20px] text-lg bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 border-none shadow-[0_10px_25px_rgba(59,130,246,0.3)] hover:shadow-[0_15px_35px_rgba(59,130,246,0.4)] transition-all"
+                    className="w-full py-4 rounded-[20px] text-lg   "
                     onClick={onClose}
                 >
                     Apply

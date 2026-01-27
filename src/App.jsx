@@ -19,6 +19,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Wallet from './pages/Wallet';
+import AddBankAccount from './pages/AddBankAccount';
+import WithdrawalRequest from './pages/WithdrawalRequest';
+import WithdrawalHistory from './pages/WithdrawalHistory';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 
@@ -62,6 +65,9 @@ function App() {
           <Route path="/resetpassword/:token" element={<ResetPassword />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/wallet" element={<Wallet />} />
+          <Route path="/wallet/add-bank" element={<AddBankAccount />} />
+          <Route path="/wallet/withdraw" element={<WithdrawalRequest />} />
+          <Route path="/wallet/history" element={<WithdrawalHistory />} />
           <Route path="*" element={<LandingPage />} />
         </Routes>
       </MainLayout>
