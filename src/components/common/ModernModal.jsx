@@ -42,7 +42,7 @@ export const ModernModalLayout = ({ isOpen, onClose, title, id, children, Header
                     </button>
 
                     {/* Header Section */}
-                    <div className="relative pt-8 sm:pt-12 pb-4 sm:pb-6 px-4 sm:px-6 text-center shrink-0">
+                    <div className="relative pt-8 sm:pt-12 pb-4 sm:pb-6anti px-4 sm:px-6 text-center shrink-0">
                         <div className="flex items-end justify-center space-x-2 mb-3 sm:mb-4">
                             <Icon className="text-orange-400 w-5 h-5 sm:w-6 sm:h-6" />
                             <div className="relative">
