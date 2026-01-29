@@ -13,6 +13,7 @@ import ApplyForInfluencer from './pages/ApplyForInfluencer';
 import InviteAndEarn from './pages/InviteAndEarn';
 import FeedbackIssues from './pages/FeedbackIssues';
 import Training from './pages/Training';
+import TrainingVideoPlayer from './pages/TrainingVideoPlayer';
 import About from './pages/About';
 import EmployeeLogin from './pages/EmployeeLogin';
 import Login from './pages/Login';
@@ -50,6 +51,7 @@ function App() {
           <Route path="/services" element={<Services />} />
           <Route path="/services" element={<Services />} />
           <Route path="/training" element={<Training />} />
+          <Route path="/training/:appId/video/:videoId" element={<TrainingVideoPlayer />} />
           <Route path="/apply-hosting" element={<ApplyForHosting />} />
           <Route path="/apply-event" element={<ApplyForEvent />} />
           <Route path="/apply-agency" element={<ApplyForAgency />} />
