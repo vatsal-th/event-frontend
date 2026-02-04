@@ -309,10 +309,10 @@ const UserHistory = () => {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl font-bold transition-all duration-300 cursor-pointer ${isActive
-                                        ? tab.color === 'purple' ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg scale-105' :
-                                            tab.color === 'blue' ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg scale-105' :
-                                                tab.color === 'indigo' ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg scale-105' :
-                                                    'bg-gradient-to-r from-pink-600 to-pink-500 text-white shadow-lg scale-105'
+                                        ? tab.color === 'purple' ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg' :
+                                            tab.color === 'blue' ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg':
+                                                tab.color === 'indigo' ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg' :
+                                                    'bg-gradient-to-r from-pink-600 to-pink-500 text-white shadow-lg'
                                         : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                                         }`}
                                 >
