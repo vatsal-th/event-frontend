@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LuMenu, LuX, LuUser, LuWallet, LuLogOut, LuChevronDown, LuBriefcase } from 'react-icons/lu';
+import { LuMenu, LuX, LuUser, LuWallet, LuLogOut, LuChevronDown, LuBriefcase, LuHistory } from 'react-icons/lu';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Button from '../components/common/Button';
 import { useAuth } from '../hooks/useAuth';
@@ -142,6 +142,10 @@ const Navbar = () => {
                                                     <LuBriefcase size={18} />
                                                     <span className="font-medium text-sm">My Services</span>
                                                 </Link>
+                                                <Link to="/history" className="flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-600 hover:text-brand-purple transition-colors" onClick={() => setIsProfileOpen(false)}>
+                                                    <LuHistory size={18} />
+                                                    <span className="font-medium text-sm">My History</span>
+                                                </Link>
                                             </div>
 
                                             <div className="p-2 border-t border-gray-100">
@@ -224,6 +228,10 @@ const Navbar = () => {
                             <Link to="/wallet" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl text-gray-600 hover:bg-gray-50">
                                 <LuWallet size={20} />
                                 <span className="font-semibold">My Wallet</span>
+                            </Link>
+                            <Link to="/history" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl text-gray-600 hover:bg-gray-50">
+                                <LuHistory size={20} />
+                                <span className="font-semibold">My History</span>
                             </Link>
                             <button
                                 onClick={handleLogout}

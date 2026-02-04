@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { LuX, LuGift } from 'react-icons/lu';
 
-const ScratchCardModal = ({ isOpen, onClose, rewardAmount = "1000" }) => {
+const ScratchCardModal = ({ isOpen, onClose, rewardAmount, onComplete }) => {
     const canvasRef = useRef(null);
     const [isScratched, setIsScratched] = useState(false);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -220,7 +220,7 @@ const ScratchCardModal = ({ isOpen, onClose, rewardAmount = "1000" }) => {
                     {/* Action Button */}
                     <div className="w-full">
                         <button
-                            onClick={isScratched ? onClose : autoScratch}
+                            onClick={isScratched ? onComplete : autoScratch}
                             className="w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl text-base sm:text-lg font-black bg-white text-brand-dark-purple transition-all duration-300 hover:bg-gray-50 cursor-pointer shadow-none outline-none"
                         >
                             {isScratched ? `Claim ₹${rewardAmount} Cash` : 'Scratch Now'}

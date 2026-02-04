@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { LuCalendar, LuWallet, LuCoins, LuMic, LuUsers, LuGift, LuArrowRight, LuCircleCheck, LuClock, LuStar, LuHistory } from 'react-icons/lu';
+import React, { useState, useEffect } from 'react';
+import { LuCalendar, LuWallet, LuCoins, LuMic, LuUsers, LuGift, LuArrowRight, LuCircleCheck, LuClock, LuStar, LuHistory, LuX, LuInfo } from 'react-icons/lu';
 import Button from '../components/common/Button';
 import ScratchCardModal from '../components/rewards/ScratchCardModal';
 import RewardHistoryModal from '../components/rewards/RewardHistoryModal';
@@ -11,6 +11,7 @@ import InfluencerStatusModal from '../components/status/InfluencerStatusModal';
 import HostingStatusModal from '../components/status/HostingStatusModal';
 import AgencyStatusModal from '../components/status/AgencyStatusModal';
 import EventStatusModal from '../components/status/EventStatusModal';
+import { getLatestStatus, markAsScratched } from '../api/userHistoryApi';
 
 const Services = () => {
     const [activeTab, setActiveTab] = useState('billing');
@@ -24,14 +25,93 @@ const Services = () => {
     const [isHostingModalOpen, setIsHostingModalOpen] = useState(false);
     const [isAgencyModalOpen, setIsAgencyModalOpen] = useState(false);
     const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+    const [activeScratchData, setActiveScratchData] = useState(null);
+
+    const [applications, setApplications] = useState({
+        hosting: null,
+        events: null,
+        agency: null,
+        influencer: null
+    });
+
+    useEffect(() => {
+        fetchApplications();
+    }, []);
+
+    const fetchApplications = async () => {
+        try {
+            const response = await getLatestStatus();
+            if (response.success) {
+                const data = response.data;
+                setApplications({
+                    hosting: data.hosting || null,
+                    events: data.events || null,
+                    agency: data.agency || null,
+                    influencer: data.influencer || null
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching applications:', error);
+        }
+    };
+
+    const handleClaimReward = (id, type, amount) => {
+        setActiveScratchData({ id, type, amount });
+        setIsRewardModalOpen(true);
+        // Close all status modals to prevent stacking
+        setIsEventModalOpen(false);
+        setIsHostingModalOpen(false);
+        setIsAgencyModalOpen(false);
+        setIsInfluencerModalOpen(false);
+        setIsTopUpModalOpen(false);
+        setIsSalaryModalOpen(false);
+        setIsInviteModalOpen(false);
+        setIsBillingModalOpen(false);
+    };
+
+    const handleScratchComplete = async () => {
+        if (!activeScratchData) return;
+
+        try {
+            await markAsScratched(activeScratchData.type, activeScratchData.id);
+            // Refetch data to update the UI (hide scratch card banner in modals)
+            await fetchApplications();
+            setIsRewardModalOpen(false);
+            setActiveScratchData(null);
+        } catch (error) {
+            console.error('Error marking as scratched:', error);
+            // Even if API fails, close modal to avoid stuck state
+            setIsRewardModalOpen(false);
+        }
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
+    };
+
+    const getStatusType = (status) => {
+        if (!status) return 'awaiting';
+        const s = status.toLowerCase();
+        if (s.includes('approve') || s.includes('pass') || s.includes('complete')) return 'approved';
+        if (s.includes('reject')) return 'rejected';
+        return 'awaiting';
+    };
 
     const statusCards = [
         {
             title: 'Event Status',
-            desc: 'Awaiting admin approval...',
-            update: 'April 17, 2024',
-            status: 'Awaiting Approval',
-            statusType: 'awaiting',
+            desc: applications.events
+                ? `${applications.events.fullName || 'Application'} - ${applications.events.status}`
+                : 'Awaiting admin approval...',
+            update: applications.events ? formatDate(applications.events.createdAt) : 'April 17, 2024',
+            status: applications.events?.status || 'Awaiting Approval',
+            statusType: getStatusType(applications.events?.status),
             icon: <LuCalendar size={32} className="text-orange-500" />,
             bgColor: 'bg-white',
             onClick: () => setIsEventModalOpen(true)
@@ -55,29 +135,42 @@ const Services = () => {
             icon: <LuCoins size={32} className="text-emerald-500" />,
             bgColor: 'bg-white',
             onClick: () => setIsSalaryModalOpen(true)
-
         },
         {
             title: 'Hosting Status',
-            desc: 'Last updated: April 14, 2024',
-            update: 'April 14, 2024',
-            status: 'Awaiting Approval',
-            statusType: 'awaiting',
+            desc: applications.hosting
+                ? `${applications.hosting.fullName || 'Application'} - ${applications.hosting.status}`
+                : 'Last updated: April 14, 2024',
+            update: applications.hosting ? formatDate(applications.hosting.createdAt) : 'April 14, 2024',
+            status: applications.hosting?.status || 'Awaiting Approval',
+            statusType: getStatusType(applications.hosting?.status),
             icon: <LuMic size={32} className="text-indigo-500" />,
             bgColor: 'bg-white',
             onClick: () => setIsHostingModalOpen(true)
-
         },
         {
             title: 'Agency Status',
-            desc: 'Last updated: April 12, 2024',
-            update: 'April 12, 2024',
-            status: 'Awaiting Approval',
-            statusType: 'awaiting',
+            desc: applications.agency
+                ? `${applications.agency.fullName || 'Application'} - ${applications.agency.status}`
+                : 'Last updated: April 12, 2024',
+            update: applications.agency ? formatDate(applications.agency.createdAt) : 'April 12, 2024',
+            status: applications.agency?.status || 'Awaiting Approval',
+            statusType: getStatusType(applications.agency?.status),
             icon: <LuUsers size={32} className="text-purple-500" />,
             bgColor: 'bg-white',
             onClick: () => setIsAgencyModalOpen(true)
-
+        },
+        {
+            title: 'Influencers Status',
+            desc: applications.influencer
+                ? `${applications.influencer.fullName || 'Application'} - ${applications.influencer.status}`
+                : 'Share your talent & earn rewards!',
+            update: applications.influencer ? formatDate(applications.influencer.createdAt) : 'April 12, 2024',
+            status: applications.influencer?.status || 'Awaiting Approval',
+            statusType: getStatusType(applications.influencer?.status),
+            icon: <LuStar size={32} className="text-pink-500" />,
+            bgColor: 'bg-white',
+            onClick: () => setIsInfluencerModalOpen(true)
         },
         {
             title: 'Scratch Card History',
@@ -87,15 +180,15 @@ const Services = () => {
             statusType: 'action',
             icon: <LuGift size={32} className="text-amber-500" />,
             bgColor: 'bg-white'
-
         }
     ];
 
     const getStatusStyle = (type) => {
         switch (type) {
             case 'awaiting': return 'bg-[#e3ecff] text-[#2866eb] border-[#c3d6ff]';
-            case 'approved': return 'bg-orange-100 text-orange-600 border-orange-200';
+            case 'approved': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
             case 'completed': return 'bg-emerald-100 text-emerald-600 border-emerald-200';
+            case 'rejected': return 'bg-red-50 text-red-600 border-red-200';
             case 'action': return 'bg-indigo-500 text-white border-indigo-500';
             default: return 'bg-gray-100 text-gray-600 border-gray-200';
         }
@@ -106,12 +199,13 @@ const Services = () => {
             case 'awaiting': return <LuClock size={14} className="mr-1" />;
             case 'approved': return <LuCircleCheck size={14} className="mr-1" />;
             case 'completed': return <LuCircleCheck size={14} className="mr-1" />;
+            case 'rejected': return <LuX size={14} className="mr-1" />;
             default: return null;
         }
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-12 md:py-20 animate-in fade-in duration-700">
+        <div className="max-w-7xl mx-auto px-4 pt-12 md:pt-16 animate-in fade-in duration-700">
             {/* Page Header */}
             <div className="text-center space-y-4 mb-16">
                 <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">My Services</h1>
@@ -156,93 +250,25 @@ const Services = () => {
                                         {card.status}
                                     </Button>
                                 </div>
-                            ) : card.update && (
-                                <div className="pt-4 border-t border-[#EAECEF] flex items-center justify-between text-[13px] text-gray-400 font-bold">
-                                    <span>Last updated: {card.update}</span>
-                                </div>
+                            ) : (
+                                <>
+                                    {card.update && (
+                                        <div className="pt-4 border-t border-[#EAECEF] flex items-center justify-between text-[13px] text-gray-400 font-bold">
+                                            <span>Last updated: {card.update}</span>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Scratch Card Rewards Section */}
-            <div className="bg-gradient-to-br from-violet-50 via-white to-pink-50 rounded-[20px] p-8 md:p-16 border border-white shadow-sm relative overflow-hidden">
-                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <div className="space-y-8">
-                        <h2 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight">
-                            Scratch Card Rewards
-                        </h2>
-
-                        {/* Tabs */}
-                        <div className="flex flex-wrap gap-3">
-                            {[
-                                { id: 'billing', label: 'Billing Status' },
-                                { id: 'influencers', label: 'Influencers Status' },
-                                { id: 'invite', label: 'Invite Status' }
-                            ].map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => {
-                                        setActiveTab(tab.id);
-                                        if (tab.id === 'billing') {
-                                            setIsBillingModalOpen(true);
-                                        }
-                                        if (tab.id === 'influencers') {
-                                            setIsInfluencerModalOpen(true);
-                                        }
-                                        if (tab.id === 'invite') {
-                                            setIsInviteModalOpen(true);
-                                        }
-                                    }}
-                                    className={`px-6 py-2.5 rounded-full text-sm font-black transition-all cursor-pointer ${activeTab === tab.id
-                                        ? 'bg-brand-purple text-white shadow-lg shadow-purple-200 ring-1 ring-purple-500/20'
-                                        : 'bg-white text-gray-400 hover:text-gray-600 border border-gray-100'
-                                        }`}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-gray-900">Get 400 to 5 Points Randomly After Approval!</h3>
-                            <p className="text-gray-500 leading-relaxed max-w-lg">
-                                After your service is approved, you'll receive a scratch card reward.
-                                Scratch to reveal random points!
-                            </p>
-                            <div className="flex gap-4">
-                                <Button variant="primary" className="px-8 py-4 shadow-xl shadow-purple-200 group flex-1" onClick={() => setIsRewardModalOpen(true)}>
-                                    Check Rewards
-                                    <LuArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-center">
-                        <div className="relative group cursor-pointer pointer-events-auto" onClick={() => setIsRewardModalOpen(true)}>
-
-                            <div className="relative bg-gradient-to-br from-amber-400 via-orange-400 to-pink-400 p-1 lg:p-1.5 rounded-[2.5rem] shadow-2xl transition-transform duration-500">
-                                <div className="bg-white/40 backdrop-blur-md rounded-[2.2rem] p-8 md:p-12 text-center space-y-6 border border-white/40">
-                                    <p className="text-2xl font-black text-white italic tracking-tighter drop-shadow-md">You Won!</p>
-                                    <div className="bg-white/90 backdrop-blur-xl rounded-2xl py-6 px-12 shadow-inner border border-white">
-                                        <p className="text-4xl md:text-5xl font-black text-brand-dark-purple tracking-tight">
-                                            + 3 Points
-                                        </p>
-                                    </div>
-                                    <p className="text-white/80 font-bold text-sm">Tap to claim reward</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <ScratchCardModal
                 isOpen={isRewardModalOpen}
                 onClose={() => setIsRewardModalOpen(false)}
-                rewardAmount="1000"
+                rewardAmount={activeScratchData?.amount}
+                onComplete={handleScratchComplete}
             />
 
             <RewardHistoryModal
@@ -253,7 +279,7 @@ const Services = () => {
             <TopUpStatusModal
                 isOpen={isTopUpModalOpen}
                 onClose={() => setIsTopUpModalOpen(false)}
-                onClaimReward={() => setIsRewardModalOpen(true)}
+                onClaimReward={(id, amount) => handleClaimReward(id, 'topup', amount)}
             />
 
             <SalaryStatusModal
@@ -265,7 +291,7 @@ const Services = () => {
             <InviteStatusModal
                 isOpen={isInviteModalOpen}
                 onClose={() => setIsInviteModalOpen(false)}
-                onClaimReward={() => setIsRewardModalOpen(true)}
+                onClaimReward={(id, amount) => handleClaimReward(id, 'invite', amount)}
             />
 
             <BillingStatusModal
@@ -276,22 +302,25 @@ const Services = () => {
             <InfluencerStatusModal
                 isOpen={isInfluencerModalOpen}
                 onClose={() => setIsInfluencerModalOpen(false)}
-                onClaimReward={() => setIsRewardModalOpen(true)}
+                onClaimReward={handleClaimReward}
             />
 
             <HostingStatusModal
                 isOpen={isHostingModalOpen}
                 onClose={() => setIsHostingModalOpen(false)}
+                onClaimReward={handleClaimReward}
             />
 
             <AgencyStatusModal
                 isOpen={isAgencyModalOpen}
                 onClose={() => setIsAgencyModalOpen(false)}
+                onClaimReward={handleClaimReward}
             />
 
             <EventStatusModal
                 isOpen={isEventModalOpen}
                 onClose={() => setIsEventModalOpen(false)}
+                onClaimReward={handleClaimReward}
             />
         </div>
     );

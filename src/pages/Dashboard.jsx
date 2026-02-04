@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LuSmartphone, LuUsers, LuMic, LuStar, LuGift, LuShare2, LuWallet } from 'react-icons/lu';
+import { LuSmartphone, LuUsers, LuMic, LuStar, LuGift, LuShare2, LuWallet, LuHistory } from 'react-icons/lu';
 import Button from '../components/common/Button';
 import ApplyForEventModal from '../components/status/ApplyForEventModal';
 import ApplyForInfluencerModal from '../components/status/ApplyForInfluencerModal';
@@ -21,7 +21,9 @@ const Dashboard = () => {
             icon: <LuMic className="text-purple-600" />,
             action: 'Apply Now',
             color: 'bg-purple-50',
-            onClick: () => setIsApplyHostingOpen(true)
+            onClick: () => setIsApplyHostingOpen(true),
+            showHistory: true,
+            historyTab: 'hosting'
         },
         {
             title: 'Apply for Event',
@@ -29,7 +31,9 @@ const Dashboard = () => {
             icon: <LuStar className="text-blue-600" />,
             action: 'Apply Now',
             color: 'bg-blue-50',
-            onClick: () => setIsApplyEventOpen(true)
+            onClick: () => setIsApplyEventOpen(true),
+            showHistory: true,
+            historyTab: 'events'
         },
         {
             title: 'Apply for Agency',
@@ -37,7 +41,9 @@ const Dashboard = () => {
             icon: <LuUsers className="text-indigo-600" />,
             action: 'Apply Now',
             color: 'bg-indigo-50',
-            onClick: () => setIsApplyAgencyOpen(true)
+            onClick: () => setIsApplyAgencyOpen(true),
+            showHistory: true,
+            historyTab: 'agency'
         },
         {
             title: 'Top Up For User',
@@ -61,7 +67,9 @@ const Dashboard = () => {
             icon: <LuShare2 className="text-pink-600" />,
             action: 'Apply Now',
             color: 'bg-pink-50',
-            onClick: () => setIsApplyInfluencerOpen(true)
+            onClick: () => setIsApplyInfluencerOpen(true),
+            showHistory: true,
+            historyTab: 'influencers'
         },
         {
             title: 'Invite Friends & Earn Rewards',
@@ -148,8 +156,22 @@ const Dashboard = () => {
                             className={`group bg-white p-8 rounded-[20px] border border-gray-100 hover:border-brand-purple/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(109,40,217,0.1)] transition-all duration-500 flex flex-col justify-between cursor-pointer ${cat.isWide ? 'lg:col-span-1' : ''}`}
                         >
                             <div className="space-y-6">
-                                <div className={`w-16 h-16 ${cat.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
-                                    {React.cloneElement(cat.icon, { size: 32 })}
+                                <div className="flex items-start justify-between">
+                                    <div className={`w-16 h-16 ${cat.color} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
+                                        {React.cloneElement(cat.icon, { size: 32 })}
+                                    </div>
+                                    {cat.showHistory && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(`/history?tab=${cat.historyTab}`);
+                                            }}
+                                            className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-brand-purple transition-all cursor-pointer"
+                                            title="View History"
+                                        >
+                                            <LuHistory size={20} />
+                                        </button>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <h3 className="text-xl font-bold text-gray-900">{cat.title}</h3>

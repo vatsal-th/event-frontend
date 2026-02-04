@@ -62,7 +62,7 @@ export const ModernModalLayout = ({ isOpen, onClose, title, id, children, Header
                         {children}
                     </div>
 
-                    <style dangerouslySetInnerHTML={{
+                    <style dangerouslySetInnerHTML={{   
                         __html: `
                         .custom-scrollbar::-webkit-scrollbar {
                             width: 4px;
