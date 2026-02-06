@@ -13,6 +13,15 @@ const Profile = () => {
     });
 
     const [message, setMessage] = useState(null);
+    const [copied, setCopied] = useState(false);
+
+    const copyInviteCode = () => {
+        if (user?.inviteId) {
+            navigator.clipboard.writeText(user.inviteId);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
 
     useEffect(() => {
         if (user) {
@@ -64,6 +73,32 @@ const Profile = () => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Invite Code Section */}
+                    {user?.inviteId && (
+                        <div className="px-8 py-6 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-100">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div>
+                                    <h3 className="text-sm font-bold text-gray-700 mb-1">Your Referral Code</h3>
+                                    <p className="text-xs text-gray-500">Share this code with friends to earn rewards!</p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-white px-6 py-3 rounded-xl border-2 border-purple-200 font-mono text-lg font-bold text-brand-purple">
+                                        {user.inviteId}
+                                    </div>
+                                    <button
+                                        onClick={copyInviteCode}
+                                        className={`px-6 py-3 rounded-xl font-bold transition-all cursor-pointer ${copied
+                                                ? 'bg-green-500 text-white'
+                                                : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg'
+                                            }`}
+                                    >
+                                        {copied ? '✓ Copied!' : 'Copy Code'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Form */}
                     <div className="p-8">

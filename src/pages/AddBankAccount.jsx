@@ -1,25 +1,49 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { LuArrowLeft, LuBuilding, LuUser, LuCreditCard, LuHash, LuCheck, LuInfo, LuLoader } from 'react-icons/lu';
+import { LuArrowLeft, LuBuilding, LuUser, LuCreditCard, LuHash, LuCheck, LuInfo, LuLoader, LuX } from 'react-icons/lu';
 import Button from '../components/common/Button';
-import { addMockBankAccount } from '../store/slices/walletSlice';
+import { Select } from '../components/common/Forms';
+import { saveBankDetails, fetchBankDetails } from '../store/slices/bankSlice';
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
 
 const AddBankAccount = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { details: bankDetails, loading, error: apiError } = useSelector((state) => state.bank);
 
-    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         accountHolderName: '',
         accountNumber: '',
         confirmAccountNumber: '',
         ifscCode: '',
         bankName: '',
-        branchName: ''
+        branch: '',
+        accountType: 'savings'
     });
 
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (!bankDetails) {
+            dispatch(fetchBankDetails());
+        }
+    }, [dispatch, bankDetails]);
+
+    useEffect(() => {
+        if (bankDetails) {
+            setFormData({
+                accountHolderName: bankDetails.accountHolderName || '',
+                accountNumber: bankDetails.accountNumber || '',
+                confirmAccountNumber: bankDetails.accountNumber || '',
+                ifscCode: bankDetails.ifscCode || '',
+                bankName: bankDetails.bankName || '',
+                branch: bankDetails.branch || '',
+                accountType: bankDetails.accountType || 'savings'
+            });
+        }
+    }, [bankDetails]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -27,7 +51,7 @@ const AddBankAccount = () => {
         if (error) setError('');
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Basic Validation
@@ -41,19 +65,18 @@ const AddBankAccount = () => {
             return;
         }
 
-        setLoading(true);
+        const resultAction = await dispatch(saveBankDetails({
+            accountHolderName: formData.accountHolderName,
+            accountNumber: formData.accountNumber,
+            ifscCode: formData.ifscCode,
+            bankName: formData.bankName,
+            branch: formData.branch,
+            accountType: formData.accountType
+        }));
 
-        // Simulate API call
-        setTimeout(() => {
-            dispatch(addMockBankAccount({
-                accountHolderName: formData.accountHolderName,
-                accountNumber: 'XXXXXX' + formData.accountNumber.slice(-4),
-                ifscCode: formData.ifscCode,
-                bankName: formData.bankName,
-            }));
-            setLoading(false);
+        if (saveBankDetails.fulfilled.match(resultAction)) {
             navigate('/wallet');
-        }, 1500);
+        }
     };
 
     return (
@@ -71,6 +94,21 @@ const AddBankAccount = () => {
             <div className="max-w-xl mx-auto px-4">
                 <div className="bg-white rounded-[2.5rem] shadow-xl shadow-purple-900/5 border border-gray-100 overflow-hidden">
                     <div className="p-6 sm:p-10">
+                        {bankDetails?.status === 'rejected' && bankDetails?.rejectionReason && (
+                            <div className="bg-red-50 p-6 rounded-2xl border border-red-100 flex items-start space-x-4 mb-8">
+                                <div className="w-10 h-10 bg-red-100 text-red-600 rounded-xl flex items-center justify-center shrink-0">
+                                    <LuX size={20} />
+                                </div>
+                                <div className="space-y-1">
+                                    <h4 className="font-bold text-red-900 text-sm">Previous Details Rejected</h4>
+                                    <p className="text-xs text-red-700 leading-relaxed font-medium">
+                                        Reason: {bankDetails.rejectionReason}
+                                    </p>
+                                    <p className="text-[10px] text-red-600 font-black uppercase tracking-widest mt-2">Please correct the information below and re-save.</p>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="bg-blue-50 p-5 rounded-2xl border border-blue-100 flex items-start space-x-3 mb-8">
                             <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
                                 <LuInfo size={18} />
@@ -112,7 +150,7 @@ const AddBankAccount = () => {
                                         name="accountNumber"
                                         value={formData.accountNumber}
                                         onChange={handleChange}
-                                        type="password"
+                                        type="text"
                                         placeholder="Enter account number"
                                         className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-brand-purple transition-all text-gray-900 font-medium placeholder:text-gray-300"
                                     />
@@ -131,7 +169,7 @@ const AddBankAccount = () => {
                                         name="confirmAccountNumber"
                                         value={formData.confirmAccountNumber}
                                         onChange={handleChange}
-                                        type="password"
+                                        type="text"
                                         placeholder="Re-enter account number"
                                         className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-brand-purple transition-all text-gray-900 font-medium placeholder:text-gray-300"
                                     />
@@ -171,10 +209,36 @@ const AddBankAccount = () => {
                                 </div>
                             </div>
 
-                            {error && (
+                            {/* Branch & Account Type */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Branch Name</label>
+                                    <input
+                                        name="branch"
+                                        value={formData.branch}
+                                        onChange={handleChange}
+                                        type="text"
+                                        placeholder="e.g. Navrangpura"
+                                        className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-brand-purple transition-all text-gray-900 font-medium placeholder:text-gray-300"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Select
+                                        label="Account Type"
+                                        value={formData.accountType}
+                                        onChange={(value) => setFormData(prev => ({ ...prev, accountType: value }))}
+                                        options={[
+                                            { label: 'Savings', value: 'savings' },
+                                            { label: 'Current', value: 'current' }
+                                        ]}
+                                    />
+                                </div>
+                            </div>
+
+                            {(error || apiError) && (
                                 <div className="flex items-center space-x-2 text-red-500 text-sm font-bold bg-red-50 p-4 rounded-xl border border-red-100 animate-in fade-in slide-in-from-top-1">
                                     <LuInfo size={18} />
-                                    <span>{error}</span>
+                                    <span>{error || apiError}</span>
                                 </div>
                             )}
 

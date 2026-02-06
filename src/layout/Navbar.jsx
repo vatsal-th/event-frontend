@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LuMenu, LuX, LuUser, LuWallet, LuLogOut, LuChevronDown, LuBriefcase, LuHistory } from 'react-icons/lu';
+import { LuMenu, LuX, LuUser, LuWallet, LuLogOut, LuChevronDown, LuBriefcase, LuHistory, LuGift } from 'react-icons/lu';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Button from '../components/common/Button';
 import { useAuth } from '../hooks/useAuth';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchWalletSummary } from '../store/slices/walletSlice';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +13,18 @@ const Navbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { isAuthenticated, user, logout } = useAuth();
+    const dispatch = useDispatch();
+    const { balance, summary } = useSelector((state) => state.wallet);
+
+    // Use summary balance if available, otherwise fall back to static balance
+    const walletBalance = summary?.currentBalance ?? balance;
+
+    // Fetch wallet summary when user is logged in
+    useEffect(() => {
+        if (user) {
+            dispatch(fetchWalletSummary());
+        }
+    }, [user, dispatch]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -136,11 +150,11 @@ const Navbar = () => {
                                                         <LuWallet size={18} />
                                                         <span className="font-medium text-sm">My Wallet</span>
                                                     </div>
-                                                    <span className="px-2 py-0.5 bg-brand-purple/10 text-brand-purple text-xs font-bold rounded-full">₹732</span>
+                                                    <span className="px-2 py-0.5 bg-brand-purple/10 text-brand-purple text-xs font-bold rounded-full">₹{walletBalance}</span>
                                                 </Link>
-                                                <Link to="/services" className="flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-600 hover:text-brand-purple transition-colors" onClick={() => setIsProfileOpen(false)}>
-                                                    <LuBriefcase size={18} />
-                                                    <span className="font-medium text-sm">My Services</span>
+                                                <Link to="/invite" className="flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-600 hover:text-brand-purple transition-colors" onClick={() => setIsProfileOpen(false)}>
+                                                    <LuGift size={18} />
+                                                    <span className="font-medium text-sm">Invite & Earn</span>
                                                 </Link>
                                                 <Link to="/history" className="flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-600 hover:text-brand-purple transition-colors" onClick={() => setIsProfileOpen(false)}>
                                                     <LuHistory size={18} />
@@ -228,6 +242,10 @@ const Navbar = () => {
                             <Link to="/wallet" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl text-gray-600 hover:bg-gray-50">
                                 <LuWallet size={20} />
                                 <span className="font-semibold">My Wallet</span>
+                            </Link>
+                            <Link to="/invite" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl text-gray-600 hover:bg-gray-50">
+                                <LuGift size={20} />
+                                <span className="font-semibold">Invite & Earn</span>
                             </Link>
                             <Link to="/history" onClick={() => setIsOpen(false)} className="flex items-center space-x-3 p-3 rounded-xl text-gray-600 hover:bg-gray-50">
                                 <LuHistory size={20} />

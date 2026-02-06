@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { LuArrowLeft, LuArrowUpRight, LuClock, LuCheck, LuX, LuInfo, LuCalendar } from 'react-icons/lu';
+import { useSelector, useDispatch } from 'react-redux';
+import { LuArrowLeft, LuArrowUpRight, LuClock, LuCheck, LuX, LuInfo, LuCalendar, LuHistory, LuLoader } from 'react-icons/lu';
+import { fetchWithdrawalHistory } from '../store/slices/walletSlice';
 
 const WithdrawalHistory = () => {
     const navigate = useNavigate();
-    const { withdrawals } = useSelector((state) => state.wallet);
+    const dispatch = useDispatch();
+    const { withdrawals, loading } = useSelector((state) => state.wallet);
+
+    useEffect(() => {
+        dispatch(fetchWithdrawalHistory({ page: 1 }));
+    }, [dispatch]);
 
     const getStatusStyles = (status) => {
         switch (status) {
@@ -49,7 +55,12 @@ const WithdrawalHistory = () => {
             </div>
 
             <div className="max-w-2xl mx-auto px-4">
-                {withdrawals.length > 0 ? (
+                {loading && withdrawals.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <LuLoader size={40} className="text-brand-purple animate-spin" />
+                        <p className="mt-4 text-gray-500 font-medium">Loading history...</p>
+                    </div>
+                ) : withdrawals.length > 0 ? (
                     <div className="space-y-4">
                         {withdrawals.map((item) => {
                             const styles = getStatusStyles(item.status);

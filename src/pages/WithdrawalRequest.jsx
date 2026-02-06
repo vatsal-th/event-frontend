@@ -3,32 +3,32 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { LuArrowLeft, LuWallet, LuShieldCheck, LuChevronDown, LuCheck, LuLoader, LuInfo, LuSend, LuPlus } from 'react-icons/lu';
 import Button from '../components/common/Button';
-import { requestMockWithdrawal, clearWalletState } from '../store/slices/walletSlice';
+import { Select } from '../components/common/Forms';
+import { createWithdrawalRequest, clearWalletState, fetchWalletSummary } from '../store/slices/walletSlice';
+import { fetchBankDetails } from '../store/slices/bankSlice';
 
 const WithdrawalRequest = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { balance, bankAccounts } = useSelector((state) => state.wallet);
+    const { balance, summary } = useSelector((state) => state.wallet);
+    const { details: bankDetails, loading: bankLoading } = useSelector((state) => state.bank);
 
     const [amount, setAmount] = useState('');
-    const [selectedBankId, setSelectedBankId] = useState(bankAccounts[0]?._id || '');
+    const [selectedBankId, setSelectedBankId] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    // Close dropdown when clicking outside
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (!event.target.closest('.dropdown-container')) {
-                setIsDropdownOpen(false);
-            }
-        };
-        if (isDropdownOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
+        dispatch(fetchWalletSummary());
+        dispatch(fetchBankDetails());
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (bankDetails) {
+            setSelectedBankId(bankDetails._id);
         }
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isDropdownOpen]);
+    }, [bankDetails]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -57,20 +57,20 @@ const WithdrawalRequest = () => {
         setLoading(true);
         setError('');
 
-        // Simulate API call
-        setTimeout(() => {
-            dispatch(requestMockWithdrawal({
-                amount: withdrawAmount,
-                bankAccountId: selectedBankId
-            }));
+        dispatch(createWithdrawalRequest({
+            amount: withdrawAmount
+        })).then((result) => {
             setLoading(false);
-            setSuccess(true);
-
-            // Redirect after 2 seconds
-            setTimeout(() => {
-                navigate('/wallet');
-            }, 2500);
-        }, 1500);
+            if (createWithdrawalRequest.fulfilled.match(result)) {
+                setSuccess(true);
+                // Redirect after 2 seconds
+                setTimeout(() => {
+                    navigate('/wallet');
+                }, 2500);
+            } else {
+                setError(result.payload || 'Failed to submit withdrawal request');
+            }
+        });
     };
 
     if (success) {
@@ -91,7 +91,7 @@ const WithdrawalRequest = () => {
         );
     }
 
-    const selectedBank = bankAccounts.find(b => b._id === selectedBankId);
+    const currentBalance = summary?.currentBalance ?? balance;
 
     return (
         <div className="min-h-[calc(100vh-5rem)] bg-gray-50 pb-12">
@@ -115,7 +115,7 @@ const WithdrawalRequest = () => {
 
                             <div className="relative z-10">
                                 <p className="text-[10px] font-black text-purple-200 uppercase tracking-widest mb-1">Available to withdraw</p>
-                                <h2 className="text-4xl font-black">₹{balance.toLocaleString('en-IN')}</h2>
+                                <h2 className="text-4xl font-black">₹{currentBalance.toLocaleString('en-IN')}</h2>
                             </div>
                             <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md relative z-10">
                                 <LuWallet size={28} />
@@ -133,14 +133,27 @@ const WithdrawalRequest = () => {
                                     <input
                                         required
                                         value={amount}
-                                        onChange={(e) => setAmount(e.target.value)}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val === '') {
+                                                setAmount('');
+                                                return;
+                                            }
+                                            const numVal = parseFloat(val);
+                                            if (numVal < 0) return;
+                                            if (numVal > currentBalance) {
+                                                setAmount(currentBalance.toString());
+                                            } else {
+                                                setAmount(val);
+                                            }
+                                        }}
                                         type="number"
                                         placeholder="0.00"
                                         className="w-full pl-12 pr-24 py-6 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-brand-purple transition-all text-3xl font-black text-gray-900 placeholder:text-gray-200"
                                     />
                                     <button
                                         type="button"
-                                        onClick={() => setAmount(balance.toString())}
+                                        onClick={() => setAmount(currentBalance.toString())}
                                         className="absolute right-4 top-1/2 -translate-y-1/2 bg-purple-100 text-brand-purple px-4 py-2 rounded-xl text-xs font-black hover:bg-purple-200 active:scale-95 transition-all cursor-pointer"
                                     >
                                         MAX
@@ -150,44 +163,30 @@ const WithdrawalRequest = () => {
 
                             {/* Bank Selection */}
                             <div className="space-y-3">
-                                <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Transfer to</label>
-                                {bankAccounts.length > 0 ? (
-                                    <div className="relative dropdown-container">
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                            className="w-full pl-5 pr-12 py-5 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-brand-purple transition-all text-gray-900 font-bold text-left flex items-center justify-between cursor-pointer"
-                                        >
-                                            <span>{selectedBank ? `${selectedBank.bankName} - ${selectedBank.accountNumber}` : 'Select Bank Account'}</span>
-                                            <LuChevronDown className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} size={20} />
-                                        </button>
-                                        {isDropdownOpen && (
-                                            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-lg z-10 max-h-48 overflow-y-auto">
-                                                {bankAccounts.map(bank => (
-                                                    <button
-                                                        key={bank._id}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setSelectedBankId(bank._id);
-                                                            setIsDropdownOpen(false);
-                                                        }}
-                                                        className="w-full px-5 py-3 text-left hover:bg-gray-50 transition-colors first:rounded-t-2xl last:rounded-b-2xl font-bold text-gray-900"
-                                                    >
-                                                        {bank.bankName} - {bank.accountNumber}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
+                                {bankDetails ? (
+                                    <Select
+                                        label="Transfer to"
+                                        value={selectedBankId}
+                                        onChange={(value) => setSelectedBankId(value)}
+                                        options={[
+                                            {
+                                                label: `${bankDetails.bankName} - ${bankDetails.accountNumber.replace(/.(?=.{4})/g, '•')}`,
+                                                value: bankDetails._id
+                                            }
+                                        ]}
+                                    />
                                 ) : (
-                                    <button
-                                        onClick={() => navigate('/wallet/add-bank')}
-                                        type="button"
-                                        className="w-full p-8 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 font-bold flex flex-col items-center justify-center hover:border-brand-purple hover:text-brand-purple hover:bg-purple-50 transition-all cursor-pointer"
-                                    >
-                                        <LuPlus className="mb-2" size={24} />
-                                        <span>Add a Bank Account First</span>
-                                    </button>
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Transfer to</label>
+                                        <button
+                                            onClick={() => navigate('/wallet/add-bank')}
+                                            type="button"
+                                            className="w-full p-8 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 font-bold flex flex-col items-center justify-center hover:border-brand-purple hover:text-brand-purple hover:bg-purple-50 transition-all cursor-pointer"
+                                        >
+                                            <LuPlus className="mb-2" size={24} />
+                                            <span>Add a Bank Account First</span>
+                                        </button>
+                                    </div>
                                 )}
                             </div>
 

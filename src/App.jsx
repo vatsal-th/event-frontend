@@ -23,6 +23,7 @@ import Wallet from './pages/Wallet';
 import AddBankAccount from './pages/AddBankAccount';
 import WithdrawalRequest from './pages/WithdrawalRequest';
 import WithdrawalHistory from './pages/WithdrawalHistory';
+import TransactionHistory from './pages/TransactionHistory';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import UserHistory from './pages/UserHistory';
@@ -71,6 +72,7 @@ function App() {
           <Route path="/wallet/add-bank" element={<AddBankAccount />} />
           <Route path="/wallet/withdraw" element={<WithdrawalRequest />} />
           <Route path="/wallet/history" element={<WithdrawalHistory />} />
+          <Route path="/wallet/transactions" element={<TransactionHistory />} />
           <Route path="/history" element={<UserHistory />} />
           <Route path="*" element={<LandingPage />} />
         </Routes>
