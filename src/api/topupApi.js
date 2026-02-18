@@ -6,12 +6,26 @@ import { apiClient } from './client';
  */
 export const createTopUpRequest = async (data) => {
     try {
+        const isFormData = data instanceof FormData;
         const response = await apiClient('/api/topups/create', {
             method: 'POST',
-            body: JSON.stringify(data),
+            body: isFormData ? data : JSON.stringify(data),
         });
         return response;
     } catch (error) {
         throw new Error(error.message || 'Failed to submit top-up request');
+    }
+};
+
+/**
+ * Get the current Top-Up QR Code
+ */
+export const getTopUpQR = async () => {
+    try {
+        return await apiClient('/api/topups/qr', {
+            method: 'GET',
+        });
+    } catch (error) {
+        throw new Error(error.message || 'Failed to fetch QR code');
     }
 };

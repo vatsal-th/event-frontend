@@ -3,6 +3,8 @@ import { LuX, LuDownload, LuFileText, LuCoins, LuLoader, LuSearch, LuCheck, LuUs
 import { FiAlertCircle } from 'react-icons/fi';
 import { searchSalaryByTalentId } from '../../api/salaryApi';
 import dayjs from 'dayjs';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const SalaryStatusModal = ({ isOpen, onClose, onClaimReward }) => {
     const [searchId, setSearchId] = useState('');
@@ -59,6 +61,81 @@ const SalaryStatusModal = ({ isOpen, onClose, onClaimReward }) => {
         { label: 'Reference No', value: salaryData.transactionId?.substring(0, 8).toUpperCase() || 'N/A' },
         { label: 'Agent Code', value: salaryData.agentCode || 'N/A' }
     ] : [];
+    
+    const handleDownload = () => {
+        if (!salaryData) return;
+
+        const doc = new jsPDF();
+        
+        // Add Header
+        doc.setFillColor(79, 70, 229); // Indigo-600
+        doc.rect(0, 0, 210, 40, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.text('RAJPUT ENTERTAINMENT HUB', 105, 20, { align: 'center' });
+        
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Official Salary Payment Advice', 105, 30, { align: 'center' });
+
+        // Add Slip Details Header
+        doc.setTextColor(31, 41, 55); // Gray-800
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text('SALARY SLIP', 20, 55);
+        
+        // Horizontal Line
+        doc.setDrawColor(229, 231, 235); // Gray-200
+        doc.line(20, 60, 190, 60);
+
+        // Prepare Table Data
+        const tableData = [
+            ['Talent ID', salaryData.targetUserId],
+            ['Nickname', salaryData.targetUserName || 'N/A'],
+            ['Payment Date', dayjs(salaryData.createdAt).format('MMMM D, YYYY')],
+            ['Reference No', salaryData.transactionId?.toUpperCase() || 'N/A'],
+            ['Agent Code', salaryData.agentCode || 'N/A'],
+            ['Status', 'PAID']
+        ];
+
+        // Add Table
+        doc.autoTable({
+            startY: 70,
+            head: [['Description', 'Details']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: { fillColor: [79, 70, 229], textBold: true },
+            styles: { fontSize: 11, cellPadding: 5 },
+            columnStyles: {
+                0: { fontStyle: 'bold', width: 60 },
+                1: { halign: 'right' }
+            }
+        });
+
+        // Add Amount Section
+        const finalY = doc.lastAutoTable.finalY + 20;
+        doc.setFillColor(243, 244, 246); // Gray-100
+        doc.rect(20, finalY - 10, 170, 25, 'F');
+        
+        doc.setFontSize(14);
+        doc.setTextColor(5, 150, 105); // Emerald-600
+        doc.setFont('helvetica', 'bold');
+        doc.text('Total Amount Paid', 30, finalY + 5);
+        doc.text(`INR ${salaryData.amount}`, 180, finalY + 5, { align: 'right' });
+
+        // Add Footer
+        doc.setFontSize(10);
+        doc.setTextColor(156, 163, 175); // Gray-400
+        doc.setFont('helvetica', 'italic');
+        const footerY = 280;
+        doc.text('This is a computer-generated document and does not require a physical signature.', 105, footerY, { align: 'center' });
+        doc.text(`Generated on: ${dayjs().format('DD/MM/YYYY HH:mm')}`, 105, footerY + 5, { align: 'center' });
+
+        // Save PDF
+        doc.save(`Salary_Slip_${salaryData.targetUserId}.pdf`);
+    };
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
@@ -161,7 +238,10 @@ const SalaryStatusModal = ({ isOpen, onClose, onClaimReward }) => {
                             </div>
 
                             <div className="space-y-3 pt-2">
-                                <button className="w-full py-3.5 rounded-xl border border-gray-200 text-gray-600 bg-white hover:bg-gray-50 font-bold flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-sm">
+                                <button 
+                                    onClick={handleDownload}
+                                    className="w-full py-3.5 rounded-xl border border-gray-200 text-gray-600 bg-white hover:bg-gray-50 font-bold flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-sm"
+                                >
                                     <LuDownload size={18} />
                                     <span>Download Slip</span>
                                 </button>

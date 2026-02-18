@@ -26,7 +26,7 @@ const EventStatusModal = ({ isOpen, onClose, onClaimReward }) => {
             setError(null);
             const response = await getLatestStatus();
             if (response.success) {
-                setApplication(response.data.events || null);
+                setApplication(response.data.event || response.data.events || null);
             } else {
                 setError('Failed to load event applications');
             }
@@ -132,6 +132,20 @@ const EventStatusModal = ({ isOpen, onClose, onClaimReward }) => {
                                         <span className={`${statusConfig.text} font-black uppercase text-sm`}>{application.status}</span>
                                     </div>
 
+                                    {/* Event Banner - Show only if Approved and exists */}
+                                    {application.status === 'Approved' && application.eventBanner && (
+                                        <div className="px-4 pt-4">
+                                            <div className="relative aspect-[16/9] rounded-2xl overflow-hidden border border-gray-200 shadow-lg group">
+                                                <img 
+                                                    src={application.eventBanner} 
+                                                    alt="Event Banner" 
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Application Details */}
                                     <div className="p-4 space-y-2">
                                         <div className="flex items-center justify-between py-2 border-b border-gray-50">
@@ -160,6 +174,34 @@ const EventStatusModal = ({ isOpen, onClose, onClaimReward }) => {
                                             <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Submitted</span>
                                             <span className="font-bold text-sm text-gray-900">{formatDate(application.createdAt)}</span>
                                         </div>
+                                        
+                                        {/* Event Specific Details */}
+                                        {application.budget && (
+                                            <div className="flex items-center justify-between py-2 border-b border-gray-50">
+                                                <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Budget</span>
+                                                <span className="font-bold text-sm text-blue-600">{application.budget}</span>
+                                            </div>
+                                        )}
+                                        {(application.eventDate || application.eventTime) && (
+                                            <div className="flex items-center justify-between py-2 border-b border-gray-50">
+                                                <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Event Schedule</span>
+                                                <span className="font-bold text-sm text-gray-900">
+                                                    {application.eventDate} {application.eventTime && `at ${application.eventTime}`}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {application.agencyCode && (
+                                            <div className="flex items-center justify-between py-2 border-b border-gray-50">
+                                                <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Agency Code</span>
+                                                <span className="font-bold text-sm text-gray-900">{application.agencyCode}</span>
+                                            </div>
+                                        )}
+                                        {application.opponentId && (
+                                            <div className="flex items-center justify-between py-2 border-b border-gray-50">
+                                                <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Opponent ID</span>
+                                                <span className="font-bold text-sm text-gray-900">{application.opponentId}</span>
+                                            </div>
+                                        )}
                                         {application.rewardPoints > 0 && application.isScratched && (
                                             <div className="flex items-center justify-between py-2">
                                                 <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Reward Points</span>

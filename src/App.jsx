@@ -27,6 +27,7 @@ import TransactionHistory from './pages/TransactionHistory';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import UserHistory from './pages/UserHistory';
+import Salary from './pages/Salary';
 
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
@@ -74,6 +75,7 @@ function App() {
           <Route path="/wallet/history" element={<WithdrawalHistory />} />
           <Route path="/wallet/transactions" element={<TransactionHistory />} />
           <Route path="/history" element={<UserHistory />} />
+          <Route path="/salary" element={<Salary />} />
           <Route path="*" element={<LandingPage />} />
         </Routes>
       </MainLayout>

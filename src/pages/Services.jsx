@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LuCalendar, LuWallet, LuCoins, LuMic, LuUsers, LuGift, LuArrowRight, LuCircleCheck, LuClock, LuStar, LuHistory, LuX, LuInfo, LuPlus } from 'react-icons/lu';
 import Button from '../components/common/Button';
 import ScratchCardModal from '../components/rewards/ScratchCardModal';
@@ -15,6 +16,7 @@ import TopUpModal from '../components/status/TopUpModal';
 import { getLatestStatus, markAsScratched } from '../api/userHistoryApi';
 
 const Services = () => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('billing');
     const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
@@ -47,7 +49,7 @@ const Services = () => {
                 const data = response.data;
                 setApplications({
                     hosting: data.hosting || null,
-                    events: data.events || null,
+                    events: data.event || data.events || null,
                     agency: data.agency || null,
                     influencer: data.influencer || null
                 });
@@ -130,13 +132,13 @@ const Services = () => {
         },
         {
             title: 'Salary Status',
-            desc: 'Salary has been credited to wallet.',
-            update: 'April 15, 2024',
-            status: 'Completed',
-            statusType: 'completed',
+            desc: 'View & download your salary slips.',
+            update: '',
+            status: 'View Records',
+            statusType: 'action',
             icon: <LuCoins size={32} className="text-emerald-500" />,
             bgColor: 'bg-white',
-            onClick: () => setIsSalaryModalOpen(true)
+            onClick: () => navigate('/salary')
         },
         {
             title: 'Hosting Status',
@@ -246,8 +248,12 @@ const Services = () => {
                                 <div className="pt-4 border-t border-[#EAECEF]">
                                     <Button
                                         variant="primary"
-                                        className="w-full w-fit py-2 text-xs font-bold uppercase tracking-wider rounded-xl"
-                                        onClick={() => setIsHistoryModalOpen(true)}
+                                        className="w-full w-fit py-2 text-xs font-bold uppercase tracking-wider rounded-xl cursor-pointer"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (card.onClick) card.onClick();
+                                            else setIsHistoryModalOpen(true);
+                                        }}
                                     >
                                         {card.status}
                                     </Button>

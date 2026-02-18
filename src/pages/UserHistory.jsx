@@ -25,7 +25,8 @@ import {
     LuMessageSquare,
     LuShieldCheck,
     LuWallet,
-    LuBuilding
+    LuBuilding,
+    LuUsers
 } from 'react-icons/lu';
 import { getUserHistory, markAsScratched } from '../api/userHistoryApi';
 import { Select } from '../components/common/Forms';
@@ -252,12 +253,26 @@ const UserHistory = () => {
                     </div>
                 </div>
 
-                <ModernFormSection title="Core Information">
-                    <DetailItem icon={LuUser} label="Full Name" value={selectedItem.fullName || selectedItem.userId?.fullName} />
-                    <DetailItem icon={LuHash} label="Mobile Number" value={selectedItem.mobileNumber} />
-                    <DetailItem icon={LuGlobe} label="Country" value={selectedItem.countryId?.name || selectedItem.countryId} />
-                    <DetailItem icon={LuUserCheck} label="Gender" value={selectedItem.gender} />
-                </ModernFormSection>
+                {/* Event Banner - Show only for Approved Events */}
+                {activeTab === 'events' && selectedItem.status === 'Approved' && selectedItem.eventBanner && (
+                    <div className="relative aspect-[16/9] rounded-2xl overflow-hidden border border-gray-100 shadow-md mb-6">
+                        <img 
+                            src={selectedItem.eventBanner} 
+                            alt="Event Banner" 
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    </div>
+                )}
+
+                {activeTab !== 'topups' && (
+                    <ModernFormSection title="Core Information">
+                        <DetailItem icon={LuUser} label="Full Name" value={selectedItem.fullName || selectedItem.userId?.fullName} />
+                        <DetailItem icon={LuHash} label="Mobile Number" value={selectedItem.mobileNumber} />
+                        <DetailItem icon={LuGlobe} label="Country" value={selectedItem.countryId?.name || selectedItem.countryId} />
+                        <DetailItem icon={LuUserCheck} label="Gender" value={selectedItem.gender} />
+                    </ModernFormSection>
+                )}
 
                 <ModernFormSection title="Application Specifics">
                     {activeTab === 'hosting' && (
@@ -320,6 +335,7 @@ const UserHistory = () => {
             </div>
         );
     };
+
 
     const renderContent = () => {
         if (loading) {
@@ -556,7 +572,7 @@ const UserHistory = () => {
     return (
         <div className="min-h-screen bg-gray-50 pb-12">
             {/* Header */}
-            <div className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
+            <div className="sticky top-0 z-40">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                         <button 
