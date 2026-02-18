@@ -6,6 +6,7 @@ import ApplyForEventModal from '../components/status/ApplyForEventModal';
 import ApplyForInfluencerModal from '../components/status/ApplyForInfluencerModal';
 import ApplyForAgencyModal from '../components/status/ApplyForAgencyModal';
 import ApplyForHostingModal from '../components/status/ApplyForHostingModal';
+import TopUpModal from '../components/status/TopUpModal';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -13,6 +14,7 @@ const Dashboard = () => {
     const [isApplyInfluencerOpen, setIsApplyInfluencerOpen] = useState(false);
     const [isApplyAgencyOpen, setIsApplyAgencyOpen] = useState(false);
     const [isApplyHostingOpen, setIsApplyHostingOpen] = useState(false);
+    const [isTopUpOpen, setIsTopUpOpen] = useState(false);
 
     const categories = [
         {
@@ -47,17 +49,18 @@ const Dashboard = () => {
         },
         {
             title: 'Top Up For User',
-            desc: 'Recharge wallet & buy cods',
+            desc: 'Securely recharge user balances',
             icon: <LuWallet className="text-orange-600" />,
             action: 'Top Up Now',
             color: 'bg-orange-50',
-            btnVariant: 'secondary'
+            btnVariant: 'secondary',
+            onClick: () => setIsTopUpOpen(true)
         },
         {
-            title: 'Apply for User',
-            desc: 'Recharge wallet & buy coins easily',
-            icon: <LuWallet className="text-violet-600" />,
-            action: 'Apply Now',
+            title: 'User Registration',
+            desc: 'Create new user accounts',
+            icon: <LuUsers className="text-violet-600" />,
+            action: 'Register Now',
             color: 'bg-violet-50',
             onClick: () => navigate('/register')
         },
@@ -184,8 +187,8 @@ const Dashboard = () => {
                                     variant={cat.btnVariant === 'secondary' ? 'secondary' : 'primary'}
                                     className="w-full"
                                     onClick={(e) => {
+                                        e.stopPropagation(); // Prevent card onClick from firing
                                         if (cat.onClick) {
-                                            e.stopPropagation();
                                             cat.onClick();
                                         }
                                     }}
@@ -213,6 +216,10 @@ const Dashboard = () => {
             <ApplyForHostingModal
                 isOpen={isApplyHostingOpen}
                 onClose={() => setIsApplyHostingOpen(false)}
+            />
+            <TopUpModal 
+                isOpen={isTopUpOpen}
+                onClose={() => setIsTopUpOpen(false)}
             />
         </div>
     );

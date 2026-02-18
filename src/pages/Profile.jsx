@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import Button from '../components/common/Button';
-import { LuUser, LuMail, LuSave, LuLoader, LuCheck, LuInfo } from 'react-icons/lu';
+import { 
+    LuUser, LuMail, LuSave, LuLoader, LuCheck, 
+    LuInfo, LuShield, LuChevronRight, LuEye, 
+    LuEyeOff, LuLock 
+} from 'react-icons/lu';
+import { getWalletPasswordStatus, updateWalletPassword } from '../api/walletApi';
+import { ModernModalLayout, ModernFormSection, ModernInputContainer, ModernInput } from '../components/common/ModernModal';
 
 const Profile = () => {
     const { user, updateUser, loading, error, success, clearError } = useAuth();
@@ -14,6 +20,33 @@ const Profile = () => {
 
     const [message, setMessage] = useState(null);
     const [copied, setCopied] = useState(false);
+
+    // Wallet Security State
+    const [hasWalletPassword, setHasWalletPassword] = useState(false);
+    const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+    const [pinLoading, setPinLoading] = useState(false);
+    const [pinData, setPinData] = useState({
+        password: '',
+        newWalletPassword: '',
+        confirmPin: ''
+    });
+    const [showLoginPassword, setShowLoginPassword] = useState(false);
+    const [showNewPin, setShowNewPin] = useState(false);
+
+    useEffect(() => {
+        fetchPasswordStatus();
+    }, []);
+
+    const fetchPasswordStatus = async () => {
+        try {
+            const res = await getWalletPasswordStatus();
+            if (res.success) {
+                setHasWalletPassword(res.hasWalletPassword);
+            }
+        } catch (err) {
+            console.error("Error fetching PIN status:", err);
+        }
+    };
 
     const copyInviteCode = () => {
         if (user?.inviteId) {
@@ -54,6 +87,36 @@ const Profile = () => {
         e.preventDefault();
         setMessage(null);
         await updateUser(formData);
+    };
+
+    const handlePinSubmit = async (e) => {
+        e.preventDefault();
+        if (pinData.newWalletPassword !== pinData.confirmPin) {
+            setMessage({ type: 'error', text: "Confirm PIN does not match!" });
+            return;
+        }
+
+        try {
+            setPinLoading(true);
+            const res = await updateWalletPassword({
+                password: pinData.password,
+                newWalletPassword: pinData.newWalletPassword
+            });
+
+            if (res.success) {
+                setMessage({ type: 'success', text: res.message || "Wallet password updated successfully!" });
+                setIsPinModalOpen(false);
+                setPinData({ password: '', newWalletPassword: '', confirmPin: '' });
+                fetchPasswordStatus();
+            } else {
+                setMessage({ type: 'error', text: res.message || "Failed to update PIN" });
+            }
+        } catch (err) {
+            setMessage({ type: 'error', text: err.message || "Something went wrong" });
+        } finally {
+            setPinLoading(false);
+            setTimeout(() => setMessage(null), 5000);
+        }
     };
 
     return (
@@ -107,17 +170,13 @@ const Profile = () => {
                             <p className="text-gray-500 text-sm">Update your personal details below.</p>
                         </div>
 
-                        {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center space-x-2 text-sm mb-6 animate-in fade-in slide-in-from-top-2">
-                                <LuInfo size={18} />
-                                <span>{error}</span>
-                            </div>
-                        )}
-
                         {message && (
-                            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center space-x-2 text-sm mb-6 animate-in fade-in slide-in-from-top-2">
-                                <LuCheck size={18} />
-                                <span>{message}</span>
+                            <div className={`mb-6 p-4 rounded-2xl border flex items-center space-x-3 transition-all animate-in fade-in zoom-in-95 ${
+                                typeof message === 'string' ? 'bg-green-50 border-green-200 text-green-700' : 
+                                message.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-600'
+                            }`}>
+                                { (typeof message === 'string' || message.type === 'success') ? <LuCheck size={20} /> : <LuInfo size={20} /> }
+                                <p className="text-sm font-bold">{typeof message === 'string' ? message : message.text}</p>
                             </div>
                         )}
 
@@ -205,9 +264,117 @@ const Profile = () => {
                                 </Button>
                             </div>
                         </form>
+
+                        {/* Wallet Security Section - Added to original UI */}
+                        <div className="mt-12 pt-8 border-t border-gray-100">
+                            <div className="mb-6">
+                                <h2 className="text-xl font-bold text-gray-900 mb-2">Wallet Security</h2>
+                                <p className="text-gray-500 text-sm">Set your transaction PIN for secure withdrawals.</p>
+                            </div>
+                            
+                            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+                                        <LuShield size={24} />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-gray-900">Transaction PIN</p>
+                                        <p className="text-xs text-gray-500">{hasWalletPassword ? 'Password is set' : 'Not set yet'}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setIsPinModalOpen(true)}
+                                    className="w-full sm:w-auto px-6 py-3 bg-white border-2 border-amber-200 text-amber-600 rounded-xl font-bold hover:bg-amber-50 active:scale-95 transition-all cursor-pointer"
+                                >
+                                    {hasWalletPassword ? 'Change Wallet Password' : 'Set Wallet Password'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            {/* PIN Setup Modal */}
+            <ModernModalLayout
+                isOpen={isPinModalOpen}
+                onClose={() => setIsPinModalOpen(false)}
+                title={hasWalletPassword ? "Change Transaction PIN" : "Setup Transaction PIN"}
+                HeaderIcon={LuShield}
+            >
+                <form onSubmit={handlePinSubmit} className="space-y-6">
+                    <p className="text-gray-400 text-xs font-bold text-center leading-relaxed">
+                        This PIN will be required for all transfers and withdrawals. Keep it secure and don't share it.
+                    </p>
+                    
+                    <ModernFormSection>
+                        <ModernInputContainer label="Current Login Password" required>
+                            <div className="relative">
+                                <ModernInput 
+                                    type={showLoginPassword ? "text" : "password"}
+                                    placeholder="Enter your account password"
+                                    required
+                                    value={pinData.password}
+                                    onChange={(e) => setPinData({...pinData, password: e.target.value})}
+                                />
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-purple transition-colors cursor-pointer"
+                                >
+                                    {showLoginPassword ? <LuEyeOff size={18} /> : <LuEye size={18} />}
+                                </button>
+                            </div>
+                        </ModernInputContainer>
+
+                        <ModernInputContainer label="New Wallet Password" required>
+                            <div className="relative">
+                                <ModernInput 
+                                    type={showNewPin ? "text" : "password"}
+                                    placeholder="Enter 4-digit PIN or password"
+                                    required
+                                    value={pinData.newWalletPassword}
+                                    onChange={(e) => setPinData({...pinData, newWalletPassword: e.target.value})}
+                                />
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowNewPin(!showNewPin)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-purple transition-colors cursor-pointer"
+                                >
+                                    {showNewPin ? <LuEyeOff size={18} /> : <LuEye size={18} />}
+                                </button>
+                            </div>
+                        </ModernInputContainer>
+
+                        <ModernInputContainer label="Confirm New PIN" required>
+                            <ModernInput 
+                                type="password"
+                                placeholder="Re-enter your new PIN"
+                                required
+                                value={pinData.confirmPin}
+                                onChange={(e) => setPinData({...pinData, confirmPin: e.target.value})}
+                            />
+                        </ModernInputContainer>
+                    </ModernFormSection>
+
+                    <div className="pt-4 flex gap-4">
+                        <button
+                            type="button"
+                            onClick={() => setIsPinModalOpen(false)}
+                            className="flex-1 py-4 bg-gray-50 text-gray-500 rounded-[20px] font-black text-xs uppercase tracking-widest hover:bg-gray-100 transition-all cursor-pointer"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={pinLoading}
+                            className="flex-[2] py-4 bg-amber-500 text-white rounded-[20px] font-black text-xs uppercase tracking-widest shadow-xl shadow-amber-100 hover:bg-amber-600 active:scale-95 transition-all flex items-center justify-center space-x-3 disabled:opacity-50 cursor-pointer"
+                        >
+                            {pinLoading ? <LuLoader className="animate-spin" /> : <LuCheck size={20} />}
+                            <span>{pinLoading ? 'Saving...' : 'Update Security'}</span>
+                        </button>
+                    </div>
+                </form>
+            </ModernModalLayout>
         </div>
     );
 };

@@ -29,3 +29,22 @@ export const getTransactionsByType = async (type) => {
         method: 'GET',
     });
 };
+/**
+ * Get wallet password status (check if set or not)
+ */
+export const getWalletPasswordStatus = async () => {
+    return await apiClient('/api/wallet/password-status', {
+        method: 'GET',
+    });
+};
+
+/**
+ * Set or update wallet password
+ * @param {Object} data - { password, newWalletPassword }
+ */
+export const updateWalletPassword = async (data) => {
+    return await apiClient('/api/wallet/password', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+};

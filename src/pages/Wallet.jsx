@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchWalletSummary } from '../store/slices/walletSlice';
 import { fetchBankDetails, removeBankDetails } from '../store/slices/bankSlice';
-import { LuPlus, LuHistory, LuSend, LuDownload, LuWallet, LuChevronRight, LuInfo, LuLoader, LuX, LuCheck } from 'react-icons/lu';
+import { LuPlus, LuHistory, LuSend, LuDownload, LuWallet, LuChevronRight, LuInfo, LuLoader, LuX, LuCheck, LuCreditCard } from 'react-icons/lu';
 
 const Wallet = () => {
     const navigate = useNavigate();
@@ -158,6 +158,14 @@ const Wallet = () => {
                             title: 'Transaction History',
                             description: 'View all your wallet transactions',
                             onClick: () => navigate('/wallet/transactions')
+                        },
+                        {
+                            type: 'button',
+                            icon: LuCreditCard,
+                            iconBg: 'bg-orange-50 text-orange-600',
+                            title: 'Withdrawal History',
+                            description: 'Check status of your withdrawal requests',
+                            onClick: () => navigate('/wallet/history')
                         },
                         {
                             type: 'button',

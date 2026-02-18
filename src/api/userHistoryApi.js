@@ -34,7 +34,7 @@ export const getLatestStatus = async () => {
  * @param {string} id - Application ID
  * @returns {Promise<Object>} The API response
  */
-export const markAsScratched = async (type, id) => {
+export const markAsScratched = async (type, id) => {    
     try {
         const response = await apiClient(`/api/rewards/scratch/${type}/${id}`, {
             method: 'PUT',

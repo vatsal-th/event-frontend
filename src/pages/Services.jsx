@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LuCalendar, LuWallet, LuCoins, LuMic, LuUsers, LuGift, LuArrowRight, LuCircleCheck, LuClock, LuStar, LuHistory, LuX, LuInfo } from 'react-icons/lu';
+import { LuCalendar, LuWallet, LuCoins, LuMic, LuUsers, LuGift, LuArrowRight, LuCircleCheck, LuClock, LuStar, LuHistory, LuX, LuInfo, LuPlus } from 'react-icons/lu';
 import Button from '../components/common/Button';
 import ScratchCardModal from '../components/rewards/ScratchCardModal';
 import RewardHistoryModal from '../components/rewards/RewardHistoryModal';
@@ -11,6 +11,7 @@ import InfluencerStatusModal from '../components/status/InfluencerStatusModal';
 import HostingStatusModal from '../components/status/HostingStatusModal';
 import AgencyStatusModal from '../components/status/AgencyStatusModal';
 import EventStatusModal from '../components/status/EventStatusModal';
+import TopUpModal from '../components/status/TopUpModal';
 import { getLatestStatus, markAsScratched } from '../api/userHistoryApi';
 
 const Services = () => {
@@ -25,6 +26,7 @@ const Services = () => {
     const [isHostingModalOpen, setIsHostingModalOpen] = useState(false);
     const [isAgencyModalOpen, setIsAgencyModalOpen] = useState(false);
     const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+    const [isTopUpCreateOpen, setIsTopUpCreateOpen] = useState(false);
     const [activeScratchData, setActiveScratchData] = useState(null);
 
     const [applications, setApplications] = useState({
@@ -180,7 +182,7 @@ const Services = () => {
             statusType: 'action',
             icon: <LuGift size={32} className="text-amber-500" />,
             bgColor: 'bg-white'
-        }
+        },
     ];
 
     const getStatusStyle = (type) => {
@@ -321,6 +323,12 @@ const Services = () => {
                 isOpen={isEventModalOpen}
                 onClose={() => setIsEventModalOpen(false)}
                 onClaimReward={handleClaimReward}
+            />
+
+            <TopUpModal 
+                isOpen={isTopUpCreateOpen}
+                onClose={() => setIsTopUpCreateOpen(false)}
+                onRefresh={fetchApplications}
             />
         </div>
     );
