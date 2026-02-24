@@ -29,8 +29,10 @@ import {
     LuUsers
 } from 'react-icons/lu';
 import { getUserHistory, markAsScratched } from '../api/userHistoryApi';
+import { getMyRechargeHistory } from '../api/rechargeApi';
 import { Select } from '../components/common/Forms';
 import ScratchCardModal from '../components/rewards/ScratchCardModal';
+import RechargeStatusModal from '../components/status/RechargeStatusModal';
 import { ModernModalLayout, ModernFormSection } from '../components/common/ModernModal';
 
 const UserHistory = () => {
@@ -49,6 +51,7 @@ const UserHistory = () => {
 
     // Detail Modal State
     const [isDetailOpen, setIsDetailOpen] = useState(false);
+    const [isRechargeDetailOpen, setIsRechargeDetailOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
 
     // Search and Filter State
@@ -63,12 +66,19 @@ const UserHistory = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await getUserHistory();
+            const [historyRes, rechargeRes] = await Promise.all([
+                getUserHistory(),
+                getMyRechargeHistory()
+            ]);
 
-            if (response.success) {
-                setHistoryData(response.data);
+            if (historyRes.success) {
+                const combinedData = { ...historyRes.data };
+                if (rechargeRes.success) {
+                    combinedData.recharges = rechargeRes.data;
+                }
+                setHistoryData(combinedData);
             } else {
-                setError(response.message || 'Failed to load history');
+                setError(historyRes.message || 'Failed to load history');
             }
         } catch (err) {
             setError(err.message || 'An error occurred while fetching history');
@@ -82,7 +92,8 @@ const UserHistory = () => {
         { id: 'events', label: 'Events', icon: LuStar, color: 'blue' },
         { id: 'influencers', label: 'Influencers', icon: LuInstagram, color: 'pink' },
         { id: 'agency', label: 'Agency', icon: LuBuilding, color: 'amber' },
-        { id: 'topups', label: 'Top-Up', icon: LuCoins, color: 'emerald' }
+        { id: 'topups', label: 'Top-Up', icon: LuCoins, color: 'emerald' },
+        { id: 'recharges', label: 'Recharge', icon: LuWallet, color: 'brand-purple' }
     ];
 
     const getStatusStyles = (status) => {
@@ -161,20 +172,24 @@ const UserHistory = () => {
 
     const handleViewDetail = (item) => {
         setSelectedItem(item);
-        setIsDetailOpen(true);
+        if (activeTab === 'recharges') {
+            setIsRechargeDetailOpen(true);
+        } else {
+            setIsDetailOpen(true);
+        }
     };
 
     // Filtered Data
     const filteredData = useMemo(() => {
         const currentData = historyData?.[activeTab] || [];
         return currentData.filter(item => {
-            const name = (item.fullName || item.targetUserName || item.userId?.fullName || '').toLowerCase();
-            const sid = (item.targetUserId || item.socialMediaId || '').toLowerCase();
+            const name = (item.fullName || item.targetUserName || item.agentName || item.userId?.fullName || '').toLowerCase();
+            const sid = (item.targetUserId || item.socialMediaId || item.utrNumber || '').toLowerCase();
             const query = searchQuery.toLowerCase();
             
             const matchesSearch = name.includes(query) || 
                                  sid.includes(query) ||
-                                 (item.mobileNumber || '').includes(searchQuery);
+                                 (item.mobileNumber || item.agentId || '').includes(searchQuery);
                                  
             const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
             return matchesSearch && matchesStatus;
@@ -208,7 +223,7 @@ const UserHistory = () => {
 
     const renderActionButtons = (item) => (
         <div className="flex items-center justify-end space-x-2">
-            {item.status === 'Approved' && item.rewardPoints > 0 && !item.isScratched && activeTab !== 'topups' && (
+            {item.status === 'Approved' && item.rewardPoints > 0 && !item.isScratched && activeTab !== 'topups' && activeTab !== 'recharges' && (
                 <button 
                     onClick={() => handleScratchOpen(item)}
                     className="flex items-center space-x-1.5 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-amber-200 transition-all active:scale-95 group cursor-pointer"
@@ -312,6 +327,15 @@ const UserHistory = () => {
                             <DetailItem icon={LuCoins} label="Amount" value={`₹${selectedItem.amount}`} color="text-brand-purple" />
                             <DetailItem icon={LuBuilding} label="App" value={selectedItem.appId?.appName} />
                             <DetailItem icon={LuShieldCheck} label="Agent Code" value={selectedItem.agentCode} />
+                        </>
+                    )}
+                    {activeTab === 'recharges' && (
+                        <>
+                            <DetailItem icon={LuUser} label="Agent Name" value={selectedItem.agentName} />
+                            <DetailItem icon={LuHash} label="Agent ID" value={selectedItem.agentId} />
+                            <DetailItem icon={LuWallet} label="Method" value={selectedItem.rechargeType} color="text-brand-purple" />
+                            <DetailItem icon={LuCoins} label="Amount" value={`₹${selectedItem.amount}`} color="text-emerald-600" />
+                            <DetailItem icon={LuShieldCheck} label="UTR Number" value={selectedItem.utrNumber} color="text-blue-600" />
                         </>
                     )}
                 </ModernFormSection>
@@ -434,6 +458,12 @@ const UserHistory = () => {
                                                         <p className="text-[10px] text-gray-400 font-medium">{item.appId?.appName}</p>
                                                     </>
                                                 )}
+                                                {activeTab === 'recharges' && (
+                                                    <>
+                                                        <p className="text-xs font-bold text-brand-purple">₹{item.amount?.toLocaleString()} ({item.rechargeType})</p>
+                                                        <p className="text-[10px] text-gray-400 font-medium truncate">UTR: {item.utrNumber}</p>
+                                                    </>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
@@ -542,9 +572,21 @@ const UserHistory = () => {
                                             </div>
                                         </>
                                     )}
+                                    {activeTab === 'recharges' && (
+                                        <>
+                                            <div>
+                                                <p className="text-[10px] font-black text-gray-400 uppercase mb-0.5 tracking-wider">Amount</p>
+                                                <p className="text-xs font-bold text-brand-purple">₹{item.amount}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black text-gray-400 uppercase mb-0.5 tracking-wider">UTR No</p>
+                                                <p className="text-xs font-bold text-gray-900 truncate">{item.utrNumber}</p>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                                 <div className="mt-4 flex items-center justify-between">
-                                    {item.status === 'Approved' && item.rewardPoints > 0 && !item.isScratched ? (
+                                    {item.status === 'Approved' && item.rewardPoints > 0 && !item.isScratched && activeTab !== 'recharges' ? (
                                         <button 
                                             onClick={() => handleScratchOpen(item)}
                                             className="flex items-center space-x-2 px-4 py-2 bg-amber-100 text-amber-700 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-amber-200 transition-all active:scale-95 cursor-pointer"
@@ -686,6 +728,13 @@ const UserHistory = () => {
                     </button>
                 </div>
             </ModernModalLayout>
+
+            {/* Recharge Status Modal */}
+            <RechargeStatusModal 
+                isOpen={isRechargeDetailOpen}
+                onClose={() => setIsRechargeDetailOpen(false)}
+                recharge={selectedItem}
+            />
         </div>
     );
 };

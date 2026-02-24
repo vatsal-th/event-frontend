@@ -13,7 +13,10 @@ import HostingStatusModal from '../components/status/HostingStatusModal';
 import AgencyStatusModal from '../components/status/AgencyStatusModal';
 import EventStatusModal from '../components/status/EventStatusModal';
 import TopUpModal from '../components/status/TopUpModal';
+import RechargeWalletModal from '../components/status/RechargeWalletModal';
+import RechargeStatusModal from '../components/status/RechargeStatusModal';
 import { getLatestStatus, markAsScratched } from '../api/userHistoryApi';
+import { getMyRechargeHistory } from '../api/rechargeApi';
 
 const Services = () => {
     const navigate = useNavigate();
@@ -29,13 +32,17 @@ const Services = () => {
     const [isAgencyModalOpen, setIsAgencyModalOpen] = useState(false);
     const [isEventModalOpen, setIsEventModalOpen] = useState(false);
     const [isTopUpCreateOpen, setIsTopUpCreateOpen] = useState(false);
+    const [isRechargeCreateOpen, setIsRechargeCreateOpen] = useState(false);
+    const [isRechargeStatusOpen, setIsRechargeStatusOpen] = useState(false);
     const [activeScratchData, setActiveScratchData] = useState(null);
+    const [latestRecharge, setLatestRecharge] = useState(null);
 
     const [applications, setApplications] = useState({
         hosting: null,
         events: null,
         agency: null,
-        influencer: null
+        influencer: null,
+        recharge: null
     });
 
     useEffect(() => {
@@ -44,14 +51,22 @@ const Services = () => {
 
     const fetchApplications = async () => {
         try {
-            const response = await getLatestStatus();
-            if (response.success) {
-                const data = response.data;
+            const [appRes, rechargeRes] = await Promise.all([
+                getLatestStatus(),
+                getMyRechargeHistory()
+            ]);
+
+            if (appRes.success) {
+                const data = appRes.data;
+                const rechargeData = rechargeRes.success && rechargeRes.data?.length > 0 ? rechargeRes.data[0] : null;
+                setLatestRecharge(rechargeData);
+                
                 setApplications({
                     hosting: data.hosting || null,
                     events: data.event || data.events || null,
                     agency: data.agency || null,
-                    influencer: data.influencer || null
+                    influencer: data.influencer || null,
+                    recharge: rechargeData
                 });
             }
         } catch (error) {
@@ -183,7 +198,27 @@ const Services = () => {
             status: 'View All',
             statusType: 'action',
             icon: <LuGift size={32} className="text-amber-500" />,
-            bgColor: 'bg-white'
+            bgColor: 'bg-white',
+            onClick: () => setIsHistoryModalOpen(true)
+        },
+        {
+            title: 'Recharge Status',
+            desc: applications.recharge 
+                ? `Limit: ₹${applications.recharge.amount} - ${applications.recharge.status}`
+                : 'View your wallet recharge history.',
+            update: applications.recharge ? formatDate(applications.recharge.createdAt) : '',
+            status: applications.recharge?.status || 'View History',
+            statusType: applications.recharge ? getStatusType(applications.recharge.status) : 'action',
+            icon: <LuWallet size={32} className="text-purple-500" />,
+            bgColor: 'bg-white',
+            onClick: () => {
+                if (applications.recharge) {
+                    setLatestRecharge(applications.recharge);
+                    setIsRechargeStatusOpen(true);
+                } else {
+                    navigate('/history?tab=recharges');
+                }
+            }
         },
     ];
 
@@ -335,6 +370,16 @@ const Services = () => {
                 isOpen={isTopUpCreateOpen}
                 onClose={() => setIsTopUpCreateOpen(false)}
                 onRefresh={fetchApplications}
+            />
+            <RechargeWalletModal 
+                isOpen={isRechargeCreateOpen}
+                onClose={() => setIsRechargeCreateOpen(false)}
+                onRefresh={fetchApplications}
+            />
+            <RechargeStatusModal 
+                isOpen={isRechargeStatusOpen}
+                onClose={() => setIsRechargeStatusOpen(false)}
+                recharge={latestRecharge}
             />
         </div>
     );

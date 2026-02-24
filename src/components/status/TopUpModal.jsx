@@ -184,12 +184,12 @@ const TopUpModal = ({ isOpen, onClose, onRefresh }) => {
                                     </ModernInputContainer>
                                 </div>
 
-                                {formData.walletType === 'Cash' && qrData?.qrCode && (
+                                {formData.walletType === 'Cash' && qrData && (
                                     <div className="mt-2 mb-4 p-4 bg-white rounded-3xl border border-gray-100 flex flex-col items-center animate-in fade-in slide-in-from-top-2">
                                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Scan QR to Pay</p>
                                         <div className="relative w-40 h-40 rounded-2xl overflow-hidden border-4 border-purple-50 p-1 bg-white shadow-inner">
                                             <img 
-                                                src={qrData.qrCode.startsWith('http') ? qrData.qrCode : `${BASE_URL}/${qrData.qrCode.startsWith('/') ? qrData.qrCode.substring(1) : qrData.qrCode}`} 
+                                                src={qrData.type === 'SCANNER' ? qrData.qrCode : (qrData.qrCode.startsWith('http') ? qrData.qrCode : `${BASE_URL}/${qrData.qrCode.startsWith('/') ? qrData.qrCode.substring(1) : qrData.qrCode}`)} 
                                                 alt="Payment QR" 
                                                 className="w-full h-full object-contain"
                                                 onError={(e) => {

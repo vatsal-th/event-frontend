@@ -7,7 +7,7 @@ dayjs.extend(relativeTime);
 import { 
     LuUsers, LuMic, LuStar, LuGift, 
     LuShare2, LuWallet, LuHistory, LuTrendingUp, 
-    LuUserCheck, LuShield, LuActivity, LuGem
+    LuUserCheck, LuShield, LuActivity, LuGem, LuPlus
 } from 'react-icons/lu';
 import { getDashboardStats } from '../api/dashboardApi';
 import Button from '../components/common/Button';
@@ -16,6 +16,9 @@ import ApplyForInfluencerModal from '../components/status/ApplyForInfluencerModa
 import ApplyForAgencyModal from '../components/status/ApplyForAgencyModal';
 import ApplyForHostingModal from '../components/status/ApplyForHostingModal';
 import TopUpModal from '../components/status/TopUpModal';
+import RechargeWalletModal from '../components/status/RechargeWalletModal';
+import RechargeStatusModal from '../components/status/RechargeStatusModal';
+import { getMyRechargeHistory } from '../api/rechargeApi';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -26,6 +29,9 @@ const Dashboard = () => {
     const [isApplyAgencyOpen, setIsApplyAgencyOpen] = useState(false);
     const [isApplyHostingOpen, setIsApplyHostingOpen] = useState(false);
     const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+    const [isRechargeOpen, setIsRechargeOpen] = useState(false);
+    const [isRechargeStatusOpen, setIsRechargeStatusOpen] = useState(false);
+    const [latestRecharge, setLatestRecharge] = useState(null);
 
     useEffect(() => {
         fetchStats();
@@ -34,9 +40,16 @@ const Dashboard = () => {
     const fetchStats = async () => {
         try {
             setLoading(true);
-            const res = await getDashboardStats();
-            if (res.success) {
-                setStats(res.data);
+            const [statsRes, rechargeRes] = await Promise.all([
+                getDashboardStats(),
+                getMyRechargeHistory()
+            ]);
+
+            if (statsRes.success) {
+                setStats(statsRes.data);
+            }
+            if (rechargeRes.success && rechargeRes.data?.length > 0) {
+                setLatestRecharge(rechargeRes.data[0]);
             }
         } catch (err) {
             console.error("Dashboard Stats Error:", err);
@@ -106,6 +119,25 @@ const Dashboard = () => {
             historyTab: 'influencers'
         },
         {
+            title: 'Recharge Wallet',
+            desc: latestRecharge 
+                ? `Last: ₹${latestRecharge.amount} (${latestRecharge.status})`
+                : 'Add balance to your wallet',
+            icon: <LuWallet className="text-brand-purple" />,
+            action: 'Recharge Now',
+            color: 'bg-purple-50',
+            onClick: () => setIsRechargeOpen(true),
+            showHistory: true,
+            historyTab: 'recharges',
+            onHistoryClick: () => {
+                if (latestRecharge) {
+                    setIsRechargeStatusOpen(true);
+                    return true; // handled
+                }
+                return false;
+            }
+        },
+        {
             title: 'Invite Friends & Earn Rewards',
             desc: 'Invite friends & earn rewards',
             icon: <LuGift className="text-emerald-600" />,
@@ -138,6 +170,13 @@ const Dashboard = () => {
                                     {loading ? <div className="h-5 w-16 bg-gray-100 animate-pulse rounded mt-1" /> : `₹${(stats?.walletBalance || 0).toLocaleString()}`}
                                 </h3>
                             </div>
+                            <button 
+                                onClick={() => setIsRechargeOpen(true)}
+                                className="ml-2 p-2 bg-brand-purple text-white rounded-xl hover:scale-110 active:scale-95 transition-all shadow-lg shadow-purple-100 cursor-pointer"
+                                title="Recharge Wallet"
+                            >
+                                <LuPlus size={18} />
+                            </button>
                         </div>
                     </div>
 
@@ -268,7 +307,10 @@ const Dashboard = () => {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    navigate(`/history?tab=${cat.historyTab}`);
+                                                    const handled = cat.onHistoryClick ? cat.onHistoryClick() : false;
+                                                    if (!handled) {
+                                                        navigate(`/history?tab=${cat.historyTab}`);
+                                                    }
                                                 }}
                                                 className="p-3 rounded-2xl bg-white hover:bg-brand-purple hover:text-white text-gray-400 transition-all cursor-pointer shadow-sm border border-gray-100"
                                                 title="View History"
@@ -323,6 +365,16 @@ const Dashboard = () => {
             <TopUpModal 
                 isOpen={isTopUpOpen}
                 onClose={() => setIsTopUpOpen(false)}
+            />
+            <RechargeWalletModal 
+                isOpen={isRechargeOpen}
+                onClose={() => setIsRechargeOpen(false)}
+                onRefresh={fetchStats}
+            />
+            <RechargeStatusModal 
+                isOpen={isRechargeStatusOpen}
+                onClose={() => setIsRechargeStatusOpen(false)}
+                recharge={latestRecharge}
             />
         </div>
     );
