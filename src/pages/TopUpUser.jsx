@@ -33,7 +33,10 @@ const TopUpUser = () => {
         targetUserName: '',
         amount: '',
         confirmAmount: '',
-        agentCode: ''
+        agentCode: '',
+        walletType: 'Main Wallet',
+        utrNumber: '',
+        paymentProof: null
     });
 
     // Modal State
@@ -108,25 +111,34 @@ const TopUpUser = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!walletPassword) return showToast("error", "Please enter your Wallet Password");
+        if (formData.walletType === 'Cash' && !formData.paymentProof) return showToast("error", "Please upload Payment Proof photo");
 
         try {
             setIsSubmitting(true);
-            const payload = {
-                appId: formData.appId,
-                targetUserId: formData.targetUserId,
-                targetUserName: formData.targetUserName,
-                amount: parseFloat(formData.amount),
-                agentCode: formData.agentCode,
-                walletPassword
-            };
+            
+            const data = new FormData();
+            data.append('appId', formData.appId);
+            data.append('targetUserId', formData.targetUserId);
+            data.append('targetUserName', formData.targetUserName);
+            data.append('amount', parseFloat(formData.amount));
+            data.append('walletType', formData.walletType);
+            data.append('paymentMethod', formData.walletType);
+            data.append('agentCode', formData.agentCode);
+            data.append('walletPassword', walletPassword);
+            data.append('utrNumber', formData.utrNumber);
+            
+            if (formData.paymentProof) {
+                data.append('paymentProof', formData.paymentProof);
+            }
 
-            const res = await createTopUpRequest(payload);
+            const res = await createTopUpRequest(data);
             if (res.success) {
                 showToast("success", "Top-up request submitted successfully!");
                 setIsPreviewOpen(false);
                 setFormData({
                     appId: '', targetUserId: '', confirmUserId: '', 
-                    targetUserName: '', amount: '', confirmAmount: '', agentCode: ''
+                    targetUserName: '', amount: '', confirmAmount: '', 
+                    agentCode: '', walletType: 'Main Wallet', utrNumber: '', paymentProof: null
                 });
                 setWalletPassword('');
                 initPage(); // Refresh data
@@ -246,8 +258,20 @@ const TopUpUser = () => {
                                             label="Select App"
                                             value={formData.appId}
                                             onChange={(val) => setFormData({...formData, appId: val})}
-                                            options={apps.map(app => ({ value: app._id, label: app.name }))}
+                                            options={apps.map(app => ({ value: app._id, label: app.appName }))}
                                             placeholder="Choose an application"
+                                        />
+                                    </div>
+
+                                    <div className="md:col-span-2">
+                                        <Select 
+                                            label="Wallet Type"
+                                            value={formData.walletType}
+                                            onChange={(val) => setFormData({...formData, walletType: val})}
+                                            options={[
+                                                { value: 'Main Wallet', label: 'Main Wallet' },
+                                                { value: 'Cash', label: 'Cash' }
+                                            ]}
                                         />
                                     </div>
 
@@ -328,7 +352,7 @@ const TopUpUser = () => {
                                         </div>
                                     </div>
 
-                                    <div className="md:col-span-2">
+                                    <div className={`md:col-span-${formData.walletType === 'Cash' ? '1' : '2'}`}>
                                         <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Agent Code</label>
                                         <div className="relative group">
                                             <LuLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-brand-purple transition-colors" size={18} />
@@ -342,6 +366,23 @@ const TopUpUser = () => {
                                             />
                                         </div>
                                     </div>
+
+                                    {formData.walletType === 'Cash' && (
+                                        <div>
+                                            <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">UTR / Ref No</label>
+                                            <div className="relative group">
+                                                <LuInfo className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-brand-purple transition-colors" size={18} />
+                                                <input 
+                                                    name="utrNumber"
+                                                    className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl py-4 pl-12 pr-6 text-sm font-bold focus:outline-none focus:border-purple-200 focus:bg-white transition-all shadow-sm"
+                                                    placeholder="Enter UTR/ID"
+                                                    required
+                                                    value={formData.utrNumber}
+                                                    onChange={handleFormChange}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <button 
@@ -435,12 +476,45 @@ const TopUpUser = () => {
                                 <span className="text-gray-400 font-bold uppercase text-[10px]">App Name</span>
                                 <span className="text-gray-900 font-black">{apps.find(a => a._id === formData.appId)?.name}</span>
                             </div>
+                            <div className="flex justify-between text-sm py-1">
+                                <span className="text-gray-400 font-bold uppercase text-[10px]">Method</span>
+                                <span className="text-gray-900 font-black">{formData.walletType}</span>
+                            </div>
                             <div className="flex justify-between text-lg py-3 border-t border-dashed border-gray-100">
                                 <span className="text-gray-400 font-black uppercase text-[11px]">Total Amount</span>
                                 <span className="text-brand-purple font-black">₹{formData.amount}</span>
                             </div>
                         </div>
                     </ModernFormSection>
+
+                    {formData.walletType === 'Cash' && (
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Payment Proof (Screenshot)</label>
+                            <div className="relative group/upload">
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={(e) => e.target.files && e.target.files[0] && setFormData({...formData, paymentProof: e.target.files[0]})}
+                                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                />
+                                <div className={`w-full h-32 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all ${
+                                    formData.paymentProof ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 bg-gray-50 group-hover/upload:border-brand-purple/50'
+                                }`}>
+                                    {formData.paymentProof ? (
+                                        <>
+                                            <LuCheck className="text-emerald-500 mb-1" size={20} />
+                                            <p className="text-[10px] font-black text-emerald-700 uppercase">{formData.paymentProof.name}</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <LuPlus className="text-gray-400 mb-1" size={20} />
+                                            <p className="text-[10px] font-black text-gray-500 uppercase">Upload Proof</p>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <ModernInputContainer label="Enter Wallet Password" required>

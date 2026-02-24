@@ -42,7 +42,7 @@ const TopUpModal = ({ isOpen, onClose, onRefresh }) => {
         agentCode: '',
         walletType: 'Main Wallet',
         walletPassword: '',
-        paymentMethod: 'Online', // Default
+        paymentMethod: 'Wallet', // Default
         utrNumber: '',
         paymentProof: null
     });
@@ -119,7 +119,7 @@ const TopUpModal = ({ isOpen, onClose, onRefresh }) => {
             data.append('walletType', formData.walletType);
             data.append('agentCode', formData.agentCode);
             data.append('walletPassword', formData.walletPassword);
-            data.append('paymentMethod', formData.walletType === 'Cash' ? 'Cash' : 'Online');
+            data.append('paymentMethod', formData.walletType);
             data.append('utrNumber', formData.utrNumber);
             
             if (formData.paymentProof) {
@@ -174,7 +174,11 @@ const TopUpModal = ({ isOpen, onClose, onRefresh }) => {
                                     <ModernInputContainer label="Wallet Type" required>
                                         <ModernSelect 
                                             value={formData.walletType}
-                                            onChange={(val) => setFormData({...formData, walletType: val})}
+                                            onChange={(val) => setFormData({
+                                                ...formData, 
+                                                walletType: val,
+                                                paymentMethod: val === 'Cash' ? 'Cash' : 'Wallet'
+                                            })}
                                             options={[
                                                 { value: 'Main Wallet', label: 'Main Wallet' },
                                                 { value: 'Cash', label: 'Cash' }
