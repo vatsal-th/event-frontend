@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LuMenu, LuX, LuUser, LuWallet, LuLogOut, LuChevronDown, LuBriefcase, LuHistory, LuGift } from 'react-icons/lu';
+import { LuMenu, LuX, LuUser, LuWallet, LuLogOut, LuChevronDown, LuBriefcase, LuHistory, LuGift, LuBell } from 'react-icons/lu';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { markAllAsRead } from '../api/notificationsApi';
+import { fetchUnreadCount } from '../store/slices/notificationSlice';
 import Button from '../components/common/Button';
 import { useAuth } from '../hooks/useAuth';
 import { useSelector, useDispatch } from 'react-redux';
@@ -15,6 +17,7 @@ const Navbar = () => {
     const { isAuthenticated, user, logout } = useAuth();
     const dispatch = useDispatch();
     const { balance, summary } = useSelector((state) => state.wallet);
+    const { unreadCount } = useSelector((state) => state.notifications);
 
     // Use summary balance if available, otherwise fall back to static balance
     const walletBalance = summary?.currentBalance ?? balance;
@@ -53,6 +56,30 @@ const Navbar = () => {
     ];
 
     const navLinks = isAuthenticated ? fullNavLinks : guestNavLinks;
+
+    // Fetch unread count
+    const fetchUnreadCountData = async () => {
+        dispatch(fetchUnreadCount());
+    };
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchUnreadCountData();
+            // Polling every 10 seconds for "instant" updates
+            const interval = setInterval(fetchUnreadCountData, 60000);
+            return () => clearInterval(interval);
+        }
+    }, [isAuthenticated]);
+
+    const handleBellClick = async () => {
+        navigate('/notifications');
+        if (unreadCount > 0) {
+            setUnreadCount(0);
+            try {
+                await markAllAsRead(); 
+            } catch (_) {}
+        }
+    };
 
     const isActive = (path) => {
         if (path === '/' && location.pathname !== '/') return false;
@@ -114,8 +141,22 @@ const Navbar = () => {
                                     </Link>
                                 </>
                             ) : (
-                                // Profile Dropdown
-                                <div className="relative" ref={dropdownRef}>
+                                <>
+                                    {/* Notification Bell */}
+                                    <button 
+                                        onClick={handleBellClick}
+                                        className="p-2 text-gray-500 hover:text-brand-purple hover:bg-purple-50 rounded-full transition-all duration-300 relative group cursor-pointer"
+                                    >
+                                        <LuBell size={24} />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white text-[9px] font-bold flex items-center justify-center rounded-full border-2 border-white group-hover:scale-110 transition-transform shadow-sm">
+                                                {unreadCount > 9 ? '9+' : unreadCount}
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    {/* Profile Dropdown */}
+                                    <div className="relative" ref={dropdownRef}>
                                     <button
                                         onClick={() => setIsProfileOpen(!isProfileOpen)}
                                         className="flex items-center space-x-2 p-1 pr-3 rounded-full border border-gray-100 hover:bg-purple-50 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-200 cursor-pointer"
@@ -174,6 +215,7 @@ const Navbar = () => {
                                         </div>
                                     )}
                                 </div>
+                                </>
                             )}
                         </div>
                     </div>
@@ -211,11 +253,16 @@ const Navbar = () => {
                             <Link
                                 key={link.name}
                                 to={link.href}
-                                className={`text-base font-semibold transition-colors block
+                                className={`text-base font-semibold transition-colors flex items-center justify-between
                                     ${isActive(link.href) ? 'text-brand-purple bg-purple-50 p-3 rounded-xl' : 'text-gray-600 hover:text-brand-purple p-3 hover:bg-gray-50 rounded-xl'}`}
                                 onClick={() => setIsOpen(false)}
                             >
-                                {link.name}
+                                <span>{link.name}</span>
+                                {link.name === 'Notifications' && unreadCount > 0 && (
+                                    <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                        {unreadCount}
+                                    </span>
+                                )}
                             </Link>
                         ))}
                     </div>

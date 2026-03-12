@@ -43,6 +43,13 @@ const UserHistory = () => {
     const [historyData, setHistoryData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Sync activeTab with URL
+    useEffect(() => {
+        if (tabFromUrl && tabFromUrl !== activeTab) {
+            setActiveTab(tabFromUrl);
+        }
+    }, [tabFromUrl]);
     
     // Rewards State
     const [isScratchOpen, setIsScratchOpen] = useState(false);

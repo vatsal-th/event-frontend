@@ -5,6 +5,7 @@ import bankReducer from './slices/bankSlice';
 import complaintReducer from './slices/complaintSlice';
 import dropdownReducer from './slices/dropdownSlice';
 import referralReducer from './slices/referralSlice';
+import notificationReducer from './slices/notificationSlice';
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         complaints: complaintReducer,
         dropdowns: dropdownReducer,
         referrals: referralReducer,
+        notifications: notificationReducer,
     },
 });
 

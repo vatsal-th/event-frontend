@@ -28,6 +28,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import UserHistory from './pages/UserHistory';
 import Salary from './pages/Salary';
+import Notifications from './pages/Notifications';
 
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
@@ -76,6 +77,7 @@ function App() {
           <Route path="/wallet/transactions" element={<TransactionHistory />} />
           <Route path="/history" element={<UserHistory />} />
           <Route path="/salary" element={<Salary />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="*" element={<LandingPage />} />
         </Routes>
       </MainLayout>
