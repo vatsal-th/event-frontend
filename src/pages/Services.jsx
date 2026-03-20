@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    LuMic, LuStar, LuUsers, LuWallet, LuShare2, LuGift, 
+import {
+    LuMic, LuStar, LuUsers, LuWallet, LuShare2, LuGift,
     LuHistory, LuActivity, LuPlus, LuChevronRight
 } from 'react-icons/lu';
 import Button from '../components/common/Button';
@@ -13,6 +13,8 @@ import TopUpModal from '../components/status/TopUpModal';
 import RechargeWalletModal from '../components/status/RechargeWalletModal';
 import RechargeStatusModal from '../components/status/RechargeStatusModal';
 import { getMyRechargeHistory } from '../api/rechargeApi';
+import { getMyPermissions } from '../api/permissionsApi';
+import PermissionRequestModal from '../components/status/PermissionRequestModal';
 
 const Services = () => {
     const navigate = useNavigate();
@@ -24,10 +26,25 @@ const Services = () => {
     const [isRechargeOpen, setIsRechargeOpen] = useState(false);
     const [isRechargeStatusOpen, setIsRechargeStatusOpen] = useState(false);
     const [latestRecharge, setLatestRecharge] = useState(null);
+    const [permissions, setPermissions] = useState([]);
+    const [isPermissionRequestOpen, setIsPermissionRequestOpen] = useState(false);
+    const [selectedService, setSelectedService] = useState('');
 
     useEffect(() => {
         fetchLatestRecharge();
+        fetchPermissions();
     }, []);
+
+    const fetchPermissions = async () => {
+        try {
+            const res = await getMyPermissions();
+            if (res.success) {
+                setPermissions(res.data);
+            }
+        } catch (err) {
+            console.error("Error fetching permissions:", err);
+        }
+    };
 
     const fetchLatestRecharge = async () => {
         try {
@@ -37,6 +54,16 @@ const Services = () => {
             }
         } catch (err) {
             console.error("Error fetching recharge history:", err);
+        }
+    };
+
+    const handleServiceClick = (serviceName, openModal) => {
+        const permission = permissions.find(p => p.serviceName === serviceName);
+        if (permission?.status === 'Approved') {
+            openModal(true);
+        } else {
+            setSelectedService(serviceName);
+            setIsPermissionRequestOpen(true);
         }
     };
 
@@ -67,7 +94,7 @@ const Services = () => {
             icon: <LuUsers className="text-indigo-600" />,
             action: 'Apply Now',
             color: 'bg-indigo-50',
-            onClick: () => setIsApplyAgencyOpen(true),
+            onClick: () => handleServiceClick('agency', setIsApplyAgencyOpen),
             showHistory: true,
             historyTab: 'agency'
         },
@@ -78,7 +105,7 @@ const Services = () => {
             action: 'Top Up Now',
             color: 'bg-orange-50',
             btnVariant: 'secondary',
-            onClick: () => setIsTopUpOpen(true)
+            onClick: () => handleServiceClick('topup', setIsTopUpOpen)
         },
         {
             title: 'Apply for Influencers',
@@ -92,13 +119,13 @@ const Services = () => {
         },
         {
             title: 'Recharge Wallet',
-            desc: latestRecharge 
+            desc: latestRecharge
                 ? `Last: ₹${latestRecharge.amount} (${latestRecharge.status})`
                 : 'Add balance to your wallet',
             icon: <LuWallet className="text-brand-purple" />,
             action: 'Recharge Now',
             color: 'bg-purple-50',
-            onClick: () => setIsRechargeOpen(true),
+            onClick: () => handleServiceClick('recharge', setIsRechargeOpen),
             showHistory: true,
             historyTab: 'recharges',
             onHistoryClick: () => {
@@ -204,19 +231,29 @@ const Services = () => {
                 isOpen={isApplyHostingOpen}
                 onClose={() => setIsApplyHostingOpen(false)}
             />
-            <TopUpModal 
+            <TopUpModal
                 isOpen={isTopUpOpen}
                 onClose={() => setIsTopUpOpen(false)}
             />
-            <RechargeWalletModal 
+            <RechargeWalletModal
                 isOpen={isRechargeOpen}
                 onClose={() => setIsRechargeOpen(false)}
                 onRefresh={fetchLatestRecharge}
             />
-            <RechargeStatusModal 
+            <RechargeStatusModal
                 isOpen={isRechargeStatusOpen}
                 onClose={() => setIsRechargeStatusOpen(false)}
                 recharge={latestRecharge}
+            />
+
+            <PermissionRequestModal
+                isOpen={isPermissionRequestOpen}
+                onClose={() => setIsPermissionRequestOpen(false)}
+                serviceName={selectedService}
+                existingRequest={permissions.find(p => p.serviceName === selectedService)}
+                onSuccess={() => {
+                    fetchPermissions();
+                }}
             />
         </div>
     );
