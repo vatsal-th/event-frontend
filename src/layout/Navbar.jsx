@@ -43,6 +43,7 @@ const Navbar = () => {
     const fullNavLinks = [
         { name: 'Dashboard', href: '/dashboard' },
         { name: 'Services', href: '/services' },
+        { name: 'Services Status', href: '/services-status' },
         { name: 'Training', href: '/training' },
         { name: 'Feedback & Issues', href: '/feedback' },
     ];
@@ -71,19 +72,13 @@ const Navbar = () => {
         }
     }, [isAuthenticated]);
 
-    const handleBellClick = async () => {
+    const handleBellClick = () => {
         navigate('/notifications');
-        if (unreadCount > 0) {
-            setUnreadCount(0);
-            try {
-                await markAllAsRead(); 
-            } catch (_) {}
-        }
     };
 
     const isActive = (path) => {
-        if (path === '/' && location.pathname !== '/') return false;
-        return location.pathname.startsWith(path);
+        if (path === '/') return location.pathname === '/';
+        return location.pathname === path || location.pathname.startsWith(path + '/');
     };
 
     const handleLogout = () => {

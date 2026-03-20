@@ -4,6 +4,7 @@ import MainLayout from './layout/MainLayout';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import Services from './pages/Services';
+import ServicesStatus from './pages/ServicesStatus';
 import ApplyForHosting from './pages/ApplyForHosting';
 import ApplyForEvent from './pages/ApplyForEvent';
 import ApplyForAgency from './pages/ApplyForAgency';
@@ -53,7 +54,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} />
-          <Route path="/services" element={<Services />} />
+          <Route path="/services-status" element={<ServicesStatus />} />
           <Route path="/training" element={<Training />} />
           <Route path="/training/:appId/video/:videoId" element={<TrainingVideoPlayer />} />
           <Route path="/apply-hosting" element={<ApplyForHosting />} />

@@ -57,13 +57,15 @@ export const getUnreadCount = async () => {
 };
 
 /**
- * Update the last viewed time for notifications
+ * Update the last viewed time for notifications (resets tab count)
+ * @param {Object} data - { type: 'service' | 'system' }
  * @returns {Promise<Object>} The API response
  */
-export const viewNotifications = async () => {
+export const viewNotifications = async (data) => {
     try {
         const response = await apiClient('/api/notifications/viewed', {
             method: 'PATCH',
+            body: JSON.stringify(data)
         });
         return response;
     } catch (error) {

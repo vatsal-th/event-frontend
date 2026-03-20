@@ -7,7 +7,11 @@ export const fetchUnreadCount = createAsyncThunk(
         try {
             const response = await getUnreadCount();
             if (response.success) {
-                return response.unreadCount;
+                return {
+                    unreadCount: response.totalUnread || response.unreadCount || 0,
+                    serviceUnread: response.serviceUnread || 0,
+                    systemUnread: response.systemUnread || 0
+                };
             }
             return rejectWithValue(response.message);
         } catch (error) {
@@ -20,6 +24,8 @@ const notificationSlice = createSlice({
     name: 'notifications',
     initialState: {
         unreadCount: 0,
+        serviceUnread: 0,
+        systemUnread: 0,
         loading: false,
         error: null
     },
@@ -27,8 +33,20 @@ const notificationSlice = createSlice({
         setUnreadCount: (state, action) => {
             state.unreadCount = action.payload;
         },
-        resetUnreadCount: (state) => {
-            state.unreadCount = 0;
+        resetUnreadCount: (state, action) => {
+            const type = action.payload; // 'service' or 'system'
+            if (type === 'service') {
+                state.unreadCount -= state.serviceUnread;
+                state.serviceUnread = 0;
+            } else if (type === 'system') {
+                state.unreadCount -= state.systemUnread;
+                state.systemUnread = 0;
+            } else {
+                state.unreadCount = 0;
+                state.serviceUnread = 0;
+                state.systemUnread = 0;
+            }
+            if (state.unreadCount < 0) state.unreadCount = 0;
         }
     },
     extraReducers: (builder) => {
@@ -38,7 +56,9 @@ const notificationSlice = createSlice({
             })
             .addCase(fetchUnreadCount.fulfilled, (state, action) => {
                 state.loading = false;
-                state.unreadCount = action.payload;
+                state.unreadCount = action.payload.unreadCount;
+                state.serviceUnread = action.payload.serviceUnread;
+                state.systemUnread = action.payload.systemUnread;
                 state.error = null;
             })
             .addCase(fetchUnreadCount.rejected, (state, action) => {
